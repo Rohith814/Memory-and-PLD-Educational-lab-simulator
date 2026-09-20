@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memory & PLD Educational Lab Simulator</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1b2b;--panel2:#10253a;--line:#23405a;--text:#e5f2ff;--muted:#88a2ba;--cyan:#57d5ff;--green:#63e0a0;--red:#ff8f86;--amber:#ffc86b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px Inter,system-ui,Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{border:1px solid #2c506c;background:#14314a;color:var(--text);border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:700}
+button:hover{background:#1c4665}
+button.secondary{background:transparent}
+button.small{padding:6px 10px;font-size:12px}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,.cell:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.app{min-height:100vh;display:flex;background-image:linear-gradient(#16314a22 1px,transparent 1px),linear-gradient(90deg,#16314a22 1px,transparent 1px);background-size:32px 32px}
+aside{width:260px;flex:none;background:#091726;border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;gap:11px;align-items:center;padding:5px 10px 25px}
+.brand .orb{width:40px;height:40px;border:1px solid #3c7799;border-radius:11px;display:grid;place-items:center;color:var(--cyan);font-weight:900}
+.brand b{font-size:13px}.brand small{display:block;color:#6e8aa4;font-size:10px;margin-top:4px;letter-spacing:1px}
+nav button{width:100%;margin:3px 0;background:transparent;border-color:transparent;color:#8ea8be;text-align:left;display:flex;gap:10px;align-items:center}
+nav button.active{background:#113650;border-color:#245e7d;color:var(--cyan)}
+main{flex:1;min-width:0;max-width:1500px;margin:auto;padding:22px 34px}
+header{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:25px}
+.hamb{display:none}
+header small{color:#6da1bf;letter-spacing:1.5px;font-weight:800}
+header h1{font-size:27px;margin:6px 0 0}
+.ready{margin-left:auto;color:var(--green);font-size:11px;font-weight:800}
+.ready.warnstat{color:var(--amber)}
+.hero{padding:32px;border:1px solid #24506b;border-radius:18px;background:linear-gradient(125deg,#0e2a43,#0a192b);display:flex;justify-content:space-between;align-items:center;gap:20px}
+.eyebrow{color:#66c8ed;font-size:11px;font-weight:900;letter-spacing:2px}
+.hero h2{font-size:34px;margin:10px 0}
+.hero p{color:var(--muted);max-width:650px;line-height:1.7}
+.hero-art{font-size:78px;color:#2e789d}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin:18px 0}
+.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px}
+.stat{padding:17px}.stat span{color:var(--muted);font-size:11px}.stat strong{display:block;font-size:29px;margin-top:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.panel{padding:20px;margin-bottom:18px}
+.panel h3{margin:0 0 17px;font-size:15px;color:#c9e1f2}
+.panel h4{margin:18px 0 8px;color:#c9e1f2}
+.title h2{margin:0;font-size:28px}.title p{color:var(--muted);line-height:1.6;margin-top:7px}.title{margin-bottom:22px}
+.actions{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.form label{display:block;color:#91aac0;font-size:12px;margin-bottom:13px}
+.form input:not([type=checkbox]),.form select,.form textarea{display:block;width:100%;margin-top:6px;padding:10px;background:#081522;border:1px solid #2b4961;color:var(--text);border-radius:8px}
+.form.inline{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 14px}
+.check{display:flex!important;gap:9px;align-items:center;color:#c9e1f2!important}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.result{padding:13px;border:1px solid #285774;background:#0c293d;border-radius:8px;color:#8bdcff;margin-top:12px;line-height:1.55}
+.result.ok{border-color:#2b6b4d;background:#0f2a22;color:var(--green)}
+.warn{border-color:#76543a;background:#2b2115;color:var(--amber)}
+.danger{border-color:#713f3c;background:#2b191e;color:var(--red)}
+.tablewrap{overflow:auto;max-height:520px}
+.tablewrap.free{max-height:none}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{text-align:left;color:#7694ad;text-transform:uppercase;font-size:10px;letter-spacing:.8px;position:sticky;top:0;background:var(--panel)}
+td,th{padding:9px 9px;border-bottom:1px solid #1d3449}
+tbody tr.selected{background:#12374d}
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover{background:#102b40}
+tr.mism td{background:#2b191e55}
+.pass{color:var(--green);font-weight:800}.fail{color:var(--red);font-weight:800}.amberc{color:var(--amber);font-weight:800}
+.log{font:12px ui-monospace,monospace}.log div{padding:9px 0;border-bottom:1px solid #1b3145}.log i{color:var(--cyan);font-style:normal;margin-right:8px}
+.muted{color:#718ba2}
+.note{color:var(--muted);line-height:1.6;font-size:13px}
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:18px}
+.step{padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:9px}
+.step b{color:var(--cyan);display:block}.step span{color:var(--muted);font-size:11px;display:block;margin-top:6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 11px;background:#11334a;border:1px solid #245772;border-radius:99px;color:#82d9fa;font-size:11px}
+.toast{position:fixed;right:20px;bottom:20px;background:#123a50;border:1px solid #3180a5;padding:12px 15px;border-radius:9px;box-shadow:0 10px 35px #0008;z-index:20;max-width:380px}
+.hidden{display:none}
+/* bits / signal path */
+.bits{display:inline-flex;gap:3px;flex-wrap:wrap;justify-content:center}
+.bit{width:22px;height:26px;border-radius:5px;display:grid;place-items:center;font:700 12px ui-monospace,monospace;background:#0a1e30;border:1px solid #2b4961;color:#56718a}
+.bit.b1{background:#0f3d33;border-color:#2b8f6b;color:var(--green)}
+.bit.bx{background:#3d1f22;border-color:#a1504b;color:var(--red)}
+.path{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;justify-content:center}
+.pnode{flex:1 1 120px;min-width:110px;padding:12px;border:1px solid #28627f;background:#102f47;border-radius:8px;text-align:center;font-size:12px;color:#78dcff;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center}
+.pnode b{color:#c9e1f2}
+.pnode.on{border-color:#2b8f6b;background:#0f2f2a}
+.parrow{align-self:center;color:#4f7a96;font-size:18px}
+.sig{display:inline-block;padding:2px 8px;border-radius:99px;background:#0a1e30;border:1px solid #2b4961;font:700 11px ui-monospace,monospace;color:#56718a}
+.sig.hi{border-color:#2b8f6b;color:var(--green);background:#0f3d33}
+.decoder{display:grid;grid-template-columns:repeat(auto-fill,minmax(26px,1fr));gap:4px;max-height:210px;overflow:auto;padding:4px}
+.dl{height:26px;border-radius:5px;background:#0a1e30;border:1px solid #244056;color:#48627a;font:10px ui-monospace,monospace;display:grid;place-items:center}
+.dl.on{background:#0f3d33;border-color:#63e0a0;color:var(--green);font-weight:800}
+/* fuse map */
+.fusewrap{overflow:auto;border:1px solid var(--line);border-radius:10px;background:#081522;padding:8px}
+svg.fuse{display:block;margin:0 auto;max-width:none}
+svg.fuse .lit,svg.fuse .term,svg.fuse .outl{stroke:#2f4d66;stroke-width:1.5}
+svg.fuse .lit.hi{stroke:#57d5ff}svg.fuse .term.hi{stroke:#63e0a0}svg.fuse .outl.hi{stroke:#63e0a0;stroke-width:2.5}
+svg.fuse .lbl{fill:#9fc0d8;font:700 12px ui-monospace,monospace}
+svg.fuse .hd{fill:#66c8ed;font:800 11px Inter,system-ui,sans-serif;letter-spacing:1px}
+svg.fuse .val{fill:#63e0a0;font:800 12px ui-monospace,monospace}
+svg.fuse .val.z{fill:#56718a}
+svg.fuse .dot{fill:#ffc86b;stroke:#08121e;stroke-width:1.5}
+svg.fuse .dotfixed{fill:#7c93a8}
+svg.fuse .ghost{fill:#1b3348}
+svg.fuse .cell{cursor:pointer}
+svg.fuse .cell:hover .ghost{fill:#57d5ff}
+svg.fuse .cell:hover .hit{fill:#57d5ff18}
+svg.fuse .hit{fill:transparent}
+.sw{display:inline-flex;align-items:center;gap:6px}
+.sw button{min-width:64px}
+.sw button.on{background:#0f3d33;border-color:#2b8f6b;color:var(--green)}
+.badge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:800;border:1px solid}
+.badge.pass{border-color:#2b6b4d;background:#0f2a22}.badge.fail{border-color:#713f3c;background:#2b191e}
+details.exp{border:1px solid var(--line);border-radius:10px;background:#0a1826;margin-bottom:10px}
+details.exp summary{cursor:pointer;padding:13px 15px;display:flex;gap:12px;align-items:center;list-style:none}
+details.exp summary::-webkit-details-marker{display:none}
+details.exp .body{padding:4px 15px 15px}
+.docs pre{background:#081522;border:1px solid #1d3449;border-radius:8px;padding:14px;overflow:auto;font:12px/1.6 ui-monospace,monospace;white-space:pre-wrap}
+.docs ul{line-height:1.8;color:#c3d6e6}
+.docs p{line-height:1.7;color:#c3d6e6}
+.step-list{margin:0;padding-left:20px;line-height:1.8}
+.step-list li b{color:var(--cyan)}
+@media(max-width:900px){aside{position:fixed;left:-270px;z-index:10;transition:.2s}aside.open{left:0}.hamb{display:inline-flex}.grid2{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:repeat(3,1fr)}main{padding:18px}.hero-art{display:none}}
+@media(max-width:520px){.stats{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr 1fr}.ready{display:none}.hero h2{font-size:27px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{aside,header,.actions,.no-print{display:none!important}main{padding:0}.app{background:white;display:block}.panel{break-inside:avoid;background:white;color:#111;border:1px solid #aaa}.panel h3,.panel h4{color:#111}body{background:white;color:#111}.muted,.note{color:#333}td,th{border-color:#bbb;color:#111}th{background:white}.pass{color:#0a7a3d}.fail{color:#b00020}.tablewrap{max-height:none;overflow:visible}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<script>
+/*CORE-START*/
+/* ============================================================
+   CORE: pure digital-logic models (no DOM). Used by the UI and
+   by the automated test-suite, so tests exercise the real code.
+   ============================================================ */
+const VARS=['A','B','C','D'];
+const pad=(n,w)=>n.toString(2).padStart(w,'0');
+const par1=s=>{let c=0;for(const ch of s)if(ch==='1')c^=1;return c};
+const hexOf=b=>/^[01]+$/.test(b)?parseInt(b,2).toString(16).toUpperCase().padStart(Math.ceil(b.length/4),'0'):'—';
+const comp=s=>s.replace(/[01]/g,c=>c==='1'?'0':'1');
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function decoderLines(a,v){return Array.from({length:2**a},(_,i)=>{for(let j=0;j<a;j++){if(((v>>j)&1)!==((i>>j)&1))return 0}return 1})}
+
+/* ---------- RAM model with fault injection ---------- */
+class RAM{
+  constructor(a=4,d=8,parityOn=false){this.a=a;this.d=d;this.parityOn=parityOn;this.size=2**a;this.cells=Array(this.size).fill(null);this.par=Array(this.size).fill(null);this.faults=[]}
+  static fromJSON(o){const r=new RAM(o.a,o.d,o.parityOn);r.cells=o.cells;r.par=o.par;r.faults=o.faults||[];return r}
+  toJSON(){return{a:this.a,d:this.d,parityOn:this.parityOn,cells:this.cells,par:this.par,faults:this.faults}}
+  clone(){return RAM.fromJSON(JSON.parse(JSON.stringify(this.toJSON())))}
+  parseAddr(s){s=String(s??'').trim();
+    if(/^0x[0-9a-f]+$/i.test(s)){const v=parseInt(s,16);if(v<this.size)return{ok:true,v};return{ok:false,code:'INVALID_ADDRESS',msg:`Address ${s} is outside the range 0x0–0x${(this.size-1).toString(16).toUpperCase()}`}}
+    if(/^[01]+$/.test(s)&&s.length===this.a)return{ok:true,v:parseInt(s,2)};
+    return{ok:false,code:'INVALID_ADDRESS',msg:`Address "${s}" is invalid: enter exactly ${this.a} binary bits (or 0x hex below ${this.size})`}}
+  parseData(s){s=String(s??'').trim();
+    if(/^0x[0-9a-f]+$/i.test(s)){const v=parseInt(s,16);if(v<2**this.d)return{ok:true,s:pad(v,this.d)};return{ok:false,code:'INVALID_DATA',msg:`Value ${s} does not fit in ${this.d} bits`}}
+    if(/^[01]+$/.test(s)&&s.length===this.d)return{ok:true,s};
+    return{ok:false,code:'INVALID_DATA',msg:`Data "${s}" is invalid: enter exactly ${this.d} binary bits (or 0x hex)`}}
+  decode(v){for(const f of this.faults){if(f.type==='addr0')v&=~(1<<f.bit);if(f.type==='addr1')v|=(1<<f.bit)}return v}
+  stuck(eff,bits){const arr=bits.split('');for(const f of this.faults){if((f.type==='stuck0'||f.type==='stuck1')&&f.addr===eff)arr[this.d-1-f.bit]=f.type==='stuck1'?'1':'0'}return arr.join('')}
+  write(as,ds){const pa=this.parseAddr(as);if(!pa.ok)return{...pa,op:'WRITE'};const pd=this.parseData(ds);if(!pd.ok)return{...pd,op:'WRITE'};
+    const eff=this.decode(pa.v),stored=this.stuck(eff,pd.s);this.cells[eff]=stored;this.par[eff]=par1(pd.s);
+    return{ok:true,op:'WRITE',addr:pa.v,eff,data:pd.s,stored}}
+  read(as){const pa=this.parseAddr(as);if(!pa.ok)return{...pa,op:'READ'};const eff=this.decode(pa.v);
+    if(this.cells[eff]==null)return{ok:false,code:'UNINITIALIZED',msg:`Address ${pad(pa.v,this.a)} has not been written yet`,op:'READ',addr:pa.v,eff};
+    const data=this.stuck(eff,this.cells[eff]),contention=data.includes('X');
+    const parityError=this.parityOn&&(contention||par1(data)!==this.par[eff]);
+    return{ok:true,op:'READ',addr:pa.v,eff,data,contention,parityError}}
+  flip(a,bit){const c=this.cells[a];if(c==null)return false;const arr=c.split(''),i=this.d-1-bit;if(arr[i]==='X')return true;arr[i]=arr[i]==='1'?'0':'1';this.cells[a]=arr.join('');return true}
+  collide(as,d1,d2){const pa=this.parseAddr(as),p1=this.parseData(d1),p2=this.parseData(d2);if(!pa.ok)return pa;if(!p1.ok)return p1;if(!p2.ok)return p2;
+    const eff=this.decode(pa.v);let m='';for(let i=0;i<this.d;i++)m+=p1.s[i]===p2.s[i]?p1.s[i]:'X';this.cells[eff]=m;this.par[eff]=par1(p1.s);return{ok:true,eff,merged:m}}
+  march(){ /* March C- : {up(w0);up(r0,w1);up(r1,w0);down(r0,w1);down(r1,w0);down(r0)} */
+    const r=new RAM(this.a,this.d,false);r.faults=this.faults.map(f=>({...f}));const z='0'.repeat(this.d),o='1'.repeat(this.d),fails=[];let ops=0;
+    const W=(a,v)=>{r.write(pad(a,this.a),v);ops++};
+    const R=(a,exp,el)=>{const x=r.read(pad(a,this.a));ops++;const act=x.ok?x.data:x.code;if(act!==exp){const bits=[];if(x.ok)for(let i=0;i<this.d;i++)if(exp[i]!==act[i])bits.push(this.d-1-i);fails.push({elem:el,addr:a,expected:exp,actual:act,bits})}};
+    const N=this.size;
+    for(let a=0;a<N;a++)W(a,z);
+    for(let a=0;a<N;a++){R(a,z,'M1');W(a,o)}
+    for(let a=0;a<N;a++){R(a,o,'M2');W(a,z)}
+    for(let a=N-1;a>=0;a--){R(a,z,'M3');W(a,o)}
+    for(let a=N-1;a>=0;a--){R(a,o,'M4');W(a,z)}
+    for(let a=N-1;a>=0;a--)R(a,z,'M5');
+    return{pass:fails.length===0,fails,ops}}
+}
+const FAULT_TYPES=['Invalid Address','Invalid Data','Read Before Write','Stuck-at-0','Stuck-at-1','Bit Flip','Address Line Stuck-at-0','Address Line Stuck-at-1','Write Collision'];
+function runFault(ram,type,p){
+  const st=[],S=(a,b)=>st.push({step:a,detail:b});
+  const out=(detected,expected,actual,summary)=>({type,detected,expected,actual,summary,steps:st});
+  const pa=ram.parseAddr(p.addr),pd=ram.parseData(p.pattern),bit=+p.bit;
+  if(type==='Invalid Address'){S(`Decode address "${p.addr}"`,pa.ok?`valid → word ${pa.v}`:`rejected (${pa.code})`);
+    return out(!pa.ok,'INVALID_ADDRESS',pa.ok?'accepted':pa.code,pa.ok?'Address is valid, so there is no fault to detect. Enter a value with the wrong width to see detection.':'Fault detected: '+pa.msg+'. Memory left unchanged.')}
+  if(type==='Invalid Data'){S(`Check data "${p.pattern}" against ${ram.d}-bit bus`,pd.ok?'fits the bus':`rejected (${pd.code})`);
+    return out(!pd.ok,'INVALID_DATA',pd.ok?'accepted':pd.code,pd.ok?'Data fits the bus, so there is no fault to detect. Enter a value with the wrong width to see detection.':'Fault detected: '+pd.msg+'. Memory left unchanged.')}
+  if(!pa.ok)return out(false,'—','—',pa.msg);
+  const A=pad(pa.v,ram.a);
+  if(type==='Read Before Write'){const r=ram.read(p.addr);S(`READ ${A} without a prior write`,r.ok?`returned ${r.data}`:`flagged ${r.code}`);
+    return out(!r.ok&&r.code==='UNINITIALIZED','UNINITIALIZED',r.ok?r.data:r.code,r.ok?`Cell ${A} already holds data, so the read is legal. Pick an empty address to see detection.`:'Fault detected: '+r.msg)}
+  if(!pd.ok)return out(false,'—','—',pd.msg);
+  if(type==='Stuck-at-0'||type==='Stuck-at-1'){const v=type==='Stuck-at-0'?0:1;
+    if(!(bit>=0&&bit<ram.d))return out(false,'—','—',`Bit index must be 0–${ram.d-1}`);
+    ram.faults.push({type:v?'stuck1':'stuck0',addr:pa.v,bit});
+    S(`Inject ${type} on address ${A}, bit ${bit}`,`that cell output is now forced to ${v}`);
+    const w=ram.write(p.addr,p.pattern);S(`WRITE ${pd.s} → ${A}`,`cell now holds ${w.stored}`);
+    const r=ram.read(p.addr);S(`READ ${A}`,`data bus returns ${r.data}${r.parityError?' · parity error raised':''}`);
+    const mism=r.data!==pd.s,det=mism||r.parityError;
+    S(`Compare expected ${pd.s} with actual ${r.data}`,det?'MISMATCH':'match');
+    return out(det,pd.s,r.data,det?`Fault detected at address ${A}, bit ${bit}.`:`Fault masked: bit ${bit} of the test pattern is already ${v}. Write the complement (${comp(pd.s)}) or run March C- to expose it.`)}
+  if(type==='Bit Flip'){if(!(bit>=0&&bit<ram.d))return out(false,'—','—',`Bit index must be 0–${ram.d-1}`);
+    const w=ram.write(p.addr,p.pattern);S(`WRITE ${pd.s} → ${A}`,`cell holds ${w.stored}`);
+    ram.flip(w.eff,bit);S(`Single-event upset flips bit ${bit}`,`cell now holds ${ram.cells[w.eff]}`);
+    const r=ram.read(p.addr);S(`READ ${A}`,`data bus returns ${r.data}${r.parityError?' · parity error raised':''}`);
+    const det=r.data!==pd.s||r.parityError;
+    return out(det,pd.s,r.data,det?`Corruption detected at ${A}${r.parityError?' (parity check caught it)':' (found by comparing with the expected value; enable parity to catch it in hardware)'}.`:'No change observed.')}
+  if(type==='Address Line Stuck-at-0'||type==='Address Line Stuck-at-1'){const v=type.endsWith('0')?0:1;
+    if(!(bit>=0&&bit<ram.a))return out(false,'—','—',`Address line must be 0–${ram.a-1}`);
+    ram.faults.push({type:v?'addr1':'addr0',bit});
+    const B=pad(pa.v^(1<<bit),ram.a),Q=comp(pd.s);
+    S(`Inject ${type} on address line A${bit}`,`decoder now ignores A${bit} and treats it as ${v}`);
+    const w1=ram.write(A,pd.s);S(`WRITE ${pd.s} → ${A}`,`decoded to word ${pad(w1.eff,ram.a)}`);
+    const w2=ram.write(B,Q);S(`WRITE ${Q} → ${B}`,`decoded to word ${pad(w2.eff,ram.a)}`);
+    const r1=ram.read(A),r2=ram.read(B);S(`READ ${A}`,`returns ${r1.data}`);S(`READ ${B}`,`returns ${r2.data}`);
+    const det=r1.data!==pd.s||r2.data!==Q;
+    return out(det,`${pd.s} / ${Q}`,`${r1.data} / ${r2.data}`,det?`Fault detected: addresses ${A} and ${B} alias to the same cell, so one write overwrote the other.`:'No aliasing observed.')}
+  if(type==='Write Collision'){const Q=comp(pd.s);const c=ram.collide(p.addr,pd.s,Q);
+    S(`Two writers drive ${A}: ${pd.s} and ${Q} in the same cycle`,`bus contention, conflicting bits become X → ${c.merged}`);
+    const r=ram.read(p.addr);S(`READ ${A}`,`returns ${r.data}`);
+    return out(r.contention,'single defined word',r.data,r.contention?'Fault detected: conflicting drivers left undefined (X) bits.':'No contention observed.')}
+  return out(false,'—','—','Unknown fault type')}
+
+/* ---------- Boolean expression parser ---------- */
+function tokenizeExpr(src){const t=[];let i=0;while(i<src.length){const c=src[i];
+  if(/\s/.test(c)){i++;continue}
+  if(/[A-Za-z]/.test(c)){t.push({t:'V',v:c.toUpperCase(),p:i});i++;continue}
+  if(c==='0'||c==='1'){t.push({t:'K',v:+c,p:i});i++;continue}
+  if(c==='+'||c==='|'){t.push({t:'+',p:i});i++;continue}
+  if(c==='^'||c==='⊕'){t.push({t:'^',p:i});i++;continue}
+  if(c==='*'||c==='&'||c==='.'||c==='·'){t.push({t:'*',p:i});i++;continue}
+  if(c==="'"||c==='’'){t.push({t:"'",p:i});i++;continue}
+  if(c==='!'||c==='~'){t.push({t:'!',p:i});i++;continue}
+  if(c==='('||c===')'){t.push({t:c,p:i});i++;continue}
+  throw new Error(`Unexpected character "${c}" at position ${i+1}`)}return t}
+function parseExpr(src,vars){const toks=tokenizeExpr(src);let pos=0;if(!toks.length)throw new Error('Expression is empty');
+  const peek=()=>toks[pos],isF=t=>t&&(t.t==='V'||t.t==='K'||t.t==='('||t.t==='!');
+  function or(){let n=xor();while(peek()&&peek().t==='+'){pos++;n={op:'or',l:n,r:xor()}}return n}
+  function xor(){let n=and();while(peek()&&peek().t==='^'){pos++;n={op:'xor',l:n,r:and()}}return n}
+  function and(){let n=unary();while(peek()&&(peek().t==='*'||isF(peek()))){if(peek().t==='*')pos++;n={op:'and',l:n,r:unary()}}return n}
+  function unary(){if(peek()&&peek().t==='!'){pos++;return{op:'not',x:unary()}}let n=atom();while(peek()&&peek().t==="'"){pos++;n={op:'not',x:n}}return n}
+  function atom(){const t=toks[pos];if(!t)throw new Error('Expression ends unexpectedly (an operand is missing)');
+    if(t.t==='V'){if(!vars.includes(t.v))throw new Error(`Unknown variable ${t.v} at position ${t.p+1} (allowed: ${vars.join(', ')})`);pos++;return{op:'var',v:t.v}}
+    if(t.t==='K'){pos++;return{op:'const',v:t.v}}
+    if(t.t==='('){pos++;const n=or();if(!toks[pos]||toks[pos].t!==')')throw new Error('Missing closing parenthesis');pos++;return n}
+    throw new Error(`Unexpected "${t.t}" at position ${t.p+1}`)}
+  const n=or();if(pos<toks.length)throw new Error(`Unexpected "${toks[pos].t==='V'?toks[pos].v:toks[pos].t}" at position ${toks[pos].p+1}`);return n}
+function evalAst(n,e){switch(n.op){case'var':return e[n.v];case'const':return n.v;case'not':return evalAst(n.x,e)^1;case'and':return evalAst(n.l,e)&evalAst(n.r,e);case'or':return evalAst(n.l,e)|evalAst(n.r,e);case'xor':return evalAst(n.l,e)^evalAst(n.r,e)}}
+function rowEnv(i,n){const e={};for(let j=0;j<n;j++)e[VARS[j]]=(i>>(n-1-j))&1;return e}
+function exprTruth(src,n){const ast=parseExpr(src,VARS.slice(0,n));return Array.from({length:2**n},(_,i)=>evalAst(ast,rowEnv(i,n)))}
+
+/* ---------- Quine–McCluskey minimiser ---------- */
+function minimize(minterms,n){
+  if(!minterms.length)return[];if(minterms.length===2**n)return['-'.repeat(n)];
+  let current=[...new Set(minterms.map(m=>pad(m,n)))],primes=[];
+  while(current.length){const used=new Set(),next=new Set();
+    for(let i=0;i<current.length;i++)for(let j=i+1;j<current.length;j++){const a=current[i],b=current[j];let diff=-1,c=0;
+      for(let k=0;k<n;k++)if(a[k]!==b[k]){c++;diff=k;if(c>1)break}
+      if(c===1&&a[diff]!=='-'&&b[diff]!=='-'){next.add(a.slice(0,diff)+'-'+a.slice(diff+1));used.add(a);used.add(b)}}
+    current.forEach(t=>{if(!used.has(t))primes.push(t)});current=[...next]}
+  primes=[...new Set(primes)];
+  const cover=(p,m)=>{const s=pad(m,n);for(let k=0;k<n;k++)if(p[k]!=='-'&&p[k]!==s[k])return false;return true};
+  const lits=p=>p.replace(/-/g,'').length,left=new Set(minterms),chosen=[];
+  for(const m of minterms){const c=primes.filter(p=>cover(p,m));if(c.length===1&&!chosen.includes(c[0]))chosen.push(c[0])}
+  chosen.forEach(p=>minterms.forEach(m=>{if(cover(p,m))left.delete(m)}));
+  while(left.size){let best=null,bc=-1;for(const p of primes){if(chosen.includes(p))continue;let c=0;left.forEach(m=>{if(cover(p,m))c++});if(c>bc||(c===bc&&best&&lits(p)<lits(best))){bc=c;best=p}}
+    chosen.push(best);left.forEach(m=>{if(cover(best,m))left.delete(m)})}
+  return chosen.sort()}
+
+/* ---------- PLA / PAL array model ---------- */
+/* and[t][2j]=true connects input j; and[t][2j+1]=true connects its complement.
+   A product term with no connected fuse is treated as unused (outputs 0).
+   PLA: programmable OR plane (or[t][o]). PAL: fixed OR plane, k terms per output. */
+function emptyPLD(kind,n,m,cap){const k=kind==='PAL'?cap:null,p=kind==='PAL'?m*cap:cap;
+  return{kind,n,m,p,k,and:Array.from({length:p},()=>Array(2*n).fill(false)),or:kind==='PLA'?Array.from({length:p},()=>Array(m).fill(false)):null}}
+function pldOr(d){if(d.kind==='PLA')return d.or;return Array.from({length:d.p},(_,t)=>Array.from({length:d.m},(_,o)=>Math.floor(t/d.k)===o))}
+function setTerm(d,t,str){for(let j=0;j<d.n;j++){if(str[j]==='1')d.and[t][2*j]=true;if(str[j]==='0')d.and[t][2*j+1]=true}}
+function pldEval(d,row){const bits=Array.from({length:d.n},(_,j)=>(row>>(d.n-1-j))&1),lit=[];bits.forEach(b=>{lit.push(b,1-b)});
+  const terms=d.and.map(fs=>{let any=false,v=1;fs.forEach((on,c)=>{if(on){any=true;v&=lit[c]}});return any?v:0});
+  const om=pldOr(d),outs=Array.from({length:d.m},(_,o)=>{let v=0;for(let t=0;t<d.p;t++)if(om[t][o]&&terms[t])v=1;return v});
+  return{bits,lit,terms,outs}}
+function pldTruth(d){const tt=Array.from({length:d.m},()=>[]);for(let i=0;i<2**d.n;i++){const e=pldEval(d,i);e.outs.forEach((v,o)=>tt[o].push(v))}return tt}
+function pldCounts(d){const om=pldOr(d);let a=0,o=0,used=0;d.and.forEach((fs,t)=>{const c=fs.filter(Boolean).length;a+=c;if(c&&om[t].some(Boolean))used++});
+  if(d.kind==='PLA')d.or.forEach(r=>r.forEach(v=>{if(v)o++}));return{andFuses:a,orFuses:o,used}}
+function termStr(fs,n){let s='';for(let j=0;j<n;j++){if(fs[2*j])s+=VARS[j];if(fs[2*j+1])s+=VARS[j]+"'"}return s}
+function pldExprs(d){const om=pldOr(d);return Array.from({length:d.m},(_,o)=>{const ts=[];for(let t=0;t<d.p;t++)if(om[t][o]&&d.and[t].some(Boolean))ts.push(termStr(d.and[t],d.n));return ts.length?ts.join(' + '):'0'})}
+function compileToPLD(kind,n,m,cap,exprs){
+  const per=[];
+  for(let o=0;o<m;o++){let tt;try{tt=exprTruth(exprs[o]??'',n)}catch(e){return{ok:false,error:`F${o+1}: ${e.message}`}}
+    const mins=[];tt.forEach((v,i)=>{if(v)mins.push(i)});
+    per.push(minimize(mins,n).flatMap(t=>/^-+$/.test(t)?['1'+'-'.repeat(n-1),'0'+'-'.repeat(n-1)]:[t]))}
+  if(kind==='PAL'){const over=per.map((l,o)=>({o,c:l.length})).filter(x=>x.c>cap);
+    if(over.length)return{ok:false,needed:per.map(l=>l.length),error:`A PAL has a fixed OR gate with ${cap} product terms per output, but ${over.map(x=>`F${x.o+1} needs ${x.c}`).join(' and ')}. Increase terms per output, or use a PLA, which can add and share terms.`};
+    const d=emptyPLD('PAL',n,m,cap);per.forEach((l,o)=>l.forEach((t,i)=>setTerm(d,o*cap+i,t)));return{ok:true,pld:d,per}}
+  const distinct=[...new Set(per.flat())];if(distinct.length>16)return{ok:false,needed:[distinct.length],error:`PLA needs ${distinct.length} product terms; this simulator supports up to 16.`};
+  const p=Math.max(cap,distinct.length,1),d=emptyPLD('PLA',n,m,p);distinct.forEach((t,i)=>setTerm(d,i,t));per.forEach((l,o)=>l.forEach(t=>{d.or[distinct.indexOf(t)][o]=true}));
+  return{ok:true,pld:d,per,distinct,grown:p>cap}}
+
+/* ---------- Seeded synthetic dataset + independent reference model ---------- */
+function refModel(ops,a,d){const m=new Map(),size=2**a;
+  const va=s=>{s=String(s).trim();if(/^0x[0-9a-f]+$/i.test(s)){const v=parseInt(s,16);return v<size?v:-1}return(/^[01]+$/.test(s)&&s.length===a)?parseInt(s,2):-1};
+  const vd=s=>{s=String(s).trim();if(/^0x[0-9a-f]+$/i.test(s)){const v=parseInt(s,16);return v<2**d?pad(v,d):null}return(/^[01]+$/.test(s)&&s.length===d)?s:null};
+  return ops.map(o=>{const ad=va(o.address);if(ad<0)return'INVALID_ADDRESS';
+    if(o.op==='WRITE'){const dd=vd(o.data);if(dd==null)return'INVALID_DATA';m.set(ad,dd);return'OK'}
+    return m.has(ad)?m.get(ad):'UNINITIALIZED'})}
+function genDataset(seed,a,d,count){const rng=mulberry32(seed),size=2**a,ops=[],written=new Set();
+  const rw=()=>pad(Math.floor(rng()*2**d),d),ra=()=>Math.floor(rng()*size);
+  for(let i=0;i<count;i++){const r=i<4?0:rng();let o;
+    if(r<.35){const ad=ra();written.add(ad);o={op:'WRITE',address:pad(ad,a),data:rw()}}
+    else if(r<.68&&written.size){const arr=[...written];o={op:'READ',address:pad(arr[Math.floor(rng()*arr.length)],a),data:''}}
+    else if(r<.76){let ad=ra(),g=0;while(written.has(ad)&&g++<size)ad=(ad+1)%size;o={op:'READ',address:pad(ad,a),data:''}}
+    else if(r<.84){o={op:rng()<.5?'WRITE':'READ',address:pad(ra(),a+1),data:rng()<.5?rw():''};if(o.op==='WRITE'&&!o.data)o.data=rw()}
+    else if(r<.92){const w=rng()<.5?d+1:d-1;let x='';for(let k=0;k<w;k++)x+=rng()<.5?'1':'0';o={op:'WRITE',address:pad(ra(),a),data:x}}
+    else{o={op:'READ',address:pad(ra(),a),data:''}}
+    ops.push(o)}
+  const ex=refModel(ops,a,d);return ops.map((o,i)=>({id:i+1,...o,expect:ex[i]}))}
+function runBatch(ram,ops){return ops.map(o=>{const r=o.op==='WRITE'?ram.write(o.address,o.data):ram.read(o.address);
+  const actual=r.ok?(o.op==='WRITE'?'OK':r.data+(r.parityError?' (PARITY ERROR)':'')):r.code;const has=o.expect!==undefined&&o.expect!=='';
+  return{...o,actual,status:has?(actual===o.expect?'PASS':'FAIL'):'N/A'}})}
+function toCSV(ops){return'id,op,address,data,expect\n'+ops.map(o=>[o.id,o.op,o.address,o.data||'',o.expect??''].join(',')).join('\n')+'\n'}
+function parseDatasetText(text,name=''){text=String(text).trim();let rows;
+  if(name.toLowerCase().endsWith('.json')||text[0]==='['||text[0]==='{'){let j;try{j=JSON.parse(text)}catch(e){throw new Error('Invalid JSON: '+e.message)}rows=Array.isArray(j)?j:j.ops;if(!Array.isArray(rows))throw new Error('JSON must be an array of operations or {"ops":[...]}')}
+  else{const lines=text.split(/\r?\n/).filter(l=>l.trim());if(lines.length<2)throw new Error('CSV needs a header row and at least one operation');
+    const h=lines[0].split(',').map(x=>x.trim().toLowerCase());if(!h.includes('op')||!h.includes('address'))throw new Error('CSV header must include at least: op,address (optional: id,data,expect)');
+    rows=lines.slice(1).map(l=>{const c=l.split(',').map(x=>x.trim()),o={};h.forEach((k,i)=>o[k]=c[i]??'');return o})}
+  return rows.map((r,i)=>{const op=String(r.op||'').toUpperCase();if(op!=='READ'&&op!=='WRITE')throw new Error(`Row ${i+1}: op must be READ or WRITE`);
+    if(r.address===undefined||r.address==='')throw new Error(`Row ${i+1}: address is missing`);if(op==='WRITE'&&!r.data)throw new Error(`Row ${i+1}: WRITE needs data`);
+    return{id:r.id||i+1,op,address:String(r.address),data:String(r.data||''),expect:r.expect===undefined?'':String(r.expect)}})}
+
+/* ---------- Experiments (real runs, seeded) ---------- */
+const FULL_ADDER=['A^B^C','AB+AC+BC'];
+const tbl=(title,head,rows)=>({title,head,rows});
+function faTruth(){const s=[],c=[];for(let i=0;i<8;i++){const A=i>>2&1,B=i>>1&1,C=i&1;s.push(A^B^C);c.push((A&B)|(A&C)|(B&C))}return{s,c}}
+const EXPERIMENTS=[
+ {name:'Basic RAM Write and Read',desc:'Write seeded words to spread addresses, read them back and compare.',run(x){
+   const ram=new RAM(x.a,x.d),rng=mulberry32(x.seed),n=Math.min(8,ram.size),step=Math.max(1,Math.floor(ram.size/n)),rows=[];let bad=0;
+   for(let i=0;i<n;i++){const ad=pad(i*step,x.a),w=pad(Math.floor(rng()*2**x.d),x.d);ram.write(ad,w);const r=ram.read(ad);const ok=r.ok&&r.data===w;if(!ok)bad++;rows.push([ad,w,r.ok?r.data:r.code,ok?'PASS':'FAIL'])}
+   return{status:bad?'FAIL':'PASS',summary:`${n-bad}/${n} words read back correctly (${ram.size} × ${x.d}-bit RAM, seed ${x.seed})`,tables:[tbl('Write / read-back',['Address','Written','Read','Result'],rows)]}}},
+ {name:'Memory Address Decoding',desc:'Feed every address into the decoder and check that exactly one word line is active.',run(x){
+   const size=2**x.a;let bad=0;const rows=[];
+   for(let v=0;v<size;v++){const L=decoderLines(x.a,v),act=L.reduce((s,b,i)=>b?s.concat(i):s,[]);const ok=act.length===1&&act[0]===v;if(!ok)bad++;if(v<16)rows.push([pad(v,x.a),act.join(',')||'none',act.length,ok?'PASS':'FAIL'])}
+   return{status:bad?'FAIL':'PASS',summary:`${size-bad}/${size} addresses activate exactly one matching word line`,tables:[tbl(`Decoder outputs${size>16?' (first 16 shown)':''}`,['Address','Active line','Lines active','Result'],rows)]}}},
+ {name:'Memory Fault Detection (March C-)',desc:'Inject a seeded stuck-at fault and locate it with the March C- test.',run(x){
+   const rng=mulberry32(x.seed+7),ram=new RAM(x.a,x.d),ad=Math.floor(rng()*ram.size),bit=Math.floor(rng()*x.d),ty=rng()<.5?'stuck0':'stuck1';
+   ram.faults.push({type:ty,addr:ad,bit});const m=ram.march(),hit=m.fails.some(f=>f.addr===ad&&f.bits.includes(bit));
+   const rows=m.fails.slice(0,10).map(f=>[f.elem,pad(f.addr,x.a),f.expected,f.actual,f.bits.join(',')||'—']);
+   return{status:hit?'PASS':'FAIL',summary:`Injected ${ty==='stuck1'?'stuck-at-1':'stuck-at-0'} at address ${pad(ad,x.a)}, bit ${bit}. March C- used ${m.ops} operations and ${hit?'located':'MISSED'} it.`,tables:[tbl('March C- failures',['Element','Address','Expected','Actual','Faulty bit'],rows.length?rows:[['—','—','—','—','—']])]}}},
+ {name:'PLA Boolean Function Implementation',desc:'Program a PLA with a full adder (Sum, Cout) and compare with the reference.',run(){
+   const r=compileToPLD('PLA',3,2,8,FULL_ADDER);if(!r.ok)return{status:'FAIL',summary:r.error,tables:[]};const t=pldTruth(r.pld),ref=faTruth(),rows=[];let bad=0;
+   for(let i=0;i<8;i++){const ok=t[0][i]===ref.s[i]&&t[1][i]===ref.c[i];if(!ok)bad++;rows.push([i>>2&1,i>>1&1,i&1,ref.s[i],t[0][i],ref.c[i],t[1][i],ok?'PASS':'FAIL'])}
+   const c=pldCounts(r.pld);return{status:bad?'FAIL':'PASS',summary:`${8-bad}/8 rows match. Uses ${c.used} product terms, ${c.andFuses} AND fuses, ${c.orFuses} OR fuses.`,tables:[tbl('Full adder on PLA',['A','B','C','Sum ref','Sum PLA','Cout ref','Cout PLA','Result'],rows),tbl('Programmed array',['Output','Expression read from fuse map'],pldExprs(r.pld).map((e,i)=>['F'+(i+1),e]))]}}},
+ {name:'PLA Truth Table Verification',desc:'Check the PLA truth table of F1 = A\'B + AC and F2 = AB + A\'C against hand-derived tables.',run(){
+   const r=compileToPLD('PLA',3,2,4,["A'B + AC","AB + A'C"]);if(!r.ok)return{status:'FAIL',summary:r.error,tables:[]};const t=pldTruth(r.pld),e1='00110101',e2='01010011',rows=[];let bad=0;
+   for(let i=0;i<8;i++){const ok=String(t[0][i])===e1[i]&&String(t[1][i])===e2[i];if(!ok)bad++;rows.push([i>>2&1,i>>1&1,i&1,e1[i],t[0][i],e2[i],t[1][i],ok?'PASS':'FAIL'])}
+   return{status:bad?'FAIL':'PASS',summary:`${8-bad}/8 rows match the hand-derived tables (F1=${e1}, F2=${e2})`,tables:[tbl('Truth table',['A','B','C','F1 expected','F1 PLA','F2 expected','F2 PLA','Result'],rows)]}}},
+ {name:'PAL Boolean Function Implementation',desc:'Program a PAL (4 fixed terms per output) with the same full adder.',run(){
+   const r=compileToPLD('PAL',3,2,4,FULL_ADDER);if(!r.ok)return{status:'FAIL',summary:r.error,tables:[]};const t=pldTruth(r.pld),ref=faTruth(),rows=[];let bad=0;
+   for(let i=0;i<8;i++){const ok=t[0][i]===ref.s[i]&&t[1][i]===ref.c[i];if(!ok)bad++;rows.push([i>>2&1,i>>1&1,i&1,ref.s[i],t[0][i],ref.c[i],t[1][i],ok?'PASS':'FAIL'])}
+   return{status:bad?'FAIL':'PASS',summary:`${8-bad}/8 rows match. Sum uses ${r.per[0].length}/4 terms, Cout uses ${r.per[1].length}/4 terms of its fixed OR gate.`,tables:[tbl('Full adder on PAL',['A','B','C','Sum ref','Sum PAL','Cout ref','Cout PAL','Result'],rows)]}}},
+ {name:'PLA vs PAL Comparison',desc:'Compare fuse usage, then push a 4-input parity function past what a PAL can hold.',run(){
+   const pla=compileToPLD('PLA',3,2,8,FULL_ADDER),pal=compileToPLD('PAL',3,2,4,FULL_ADDER);if(!pla.ok||!pal.ok)return{status:'FAIL',summary:'Full adder failed to compile',tables:[]};
+   const cp=pldCounts(pla.pld),ca=pldCounts(pal.pld),same=JSON.stringify(pldTruth(pla.pld))===JSON.stringify(pldTruth(pal.pld));
+   const par='A^B^C^D',plaP=compileToPLD('PLA',4,1,8,[par]),palP=compileToPLD('PAL',4,1,4,[par]);const ok=same&&plaP.ok&&!palP.ok;
+   return{status:ok?'PASS':'FAIL',summary:`Full adder gives identical truth tables on both. 4-input parity: PLA ${plaP.ok?'fits':'fails'}, PAL ${palP.ok?'fits (unexpected)':'is rejected'}.`,tables:[
+     tbl('Full adder (Sum, Cout)',['Metric','PLA','PAL'],[['Product terms available',pla.pld.p,pal.pld.p],['Product terms used',cp.used,ca.used],['AND-plane fuses programmed',cp.andFuses,ca.andFuses],['OR-plane fuses programmed',cp.orFuses,'fixed (not programmable)'],['Truth tables identical',same?'yes':'no',same?'yes':'no']]),
+     tbl('4-input parity F = A⊕B⊕C⊕D',['Device','Outcome'],[['PLA (8 terms)',plaP.ok?'Fits: 8 product terms':plaP.error],['PAL (4 terms per output)',palP.ok?'Fits':palP.error]])]}}}
+];
+function runExperiment(i,x){try{const r=EXPERIMENTS[i].run(x);return{...r,id:i,name:EXPERIMENTS[i].name,at:new Date().toLocaleString()}}catch(e){return{id:i,name:EXPERIMENTS[i].name,status:'FAIL',summary:'Experiment crashed: '+e.message,tables:[],at:new Date().toLocaleString()}}}
+
+/* ---------- Automated test-suite (22 tests: 12 normal + 10 edge/fault) ---------- */
+function runTestSuite(seed=2201){const out=[];
+  const T=(id,kind,name,input,expected,actual)=>out.push({id,kind,name,input,expected:String(expected),actual:String(actual),status:String(expected)===String(actual)?'PASS':'FAIL'});
+  const safe=(f)=>{try{return f()}catch(e){return'EXCEPTION: '+e.message}};
+  let ram=new RAM(4,8);
+  T('TC01','Normal','RAM write then read','W 0010←10101010; R 0010','10101010',safe(()=>{ram.write('0010','10101010');return ram.read('0010').data}));
+  T('TC02','Normal','Overwrite existing word','W 0010←11110000; R 0010','11110000',safe(()=>{ram.write('0010','11110000');return ram.read('0010').data}));
+  T('TC03','Normal','Locations are independent','W 0011←11001100; R 0010, R 0011','11110000|11001100',safe(()=>{ram.write('0011','11001100');return ram.read('0010').data+'|'+ram.read('0011').data}));
+  T('TC04','Normal','First and last address','W 0000, W 1111; read both','00000001|10000000',safe(()=>{const r=new RAM(4,8);r.write('0000','00000001');r.write('1111','10000000');return r.read('0000').data+'|'+r.read('1111').data}));
+  T('TC05','Normal','Address decoder one-hot','address 0101','line 5 only',safe(()=>{const L=decoderLines(4,5),a=L.reduce((s,b,i)=>b?s.concat(i):s,[]);return a.length===1?`line ${a[0]} only`:`lines ${a.join(',')}`}));
+  T('TC06','Normal','Sequential fill, seeded data',`16 writes, seed ${seed}; 16 reads`,'16/16',safe(()=>{const r=new RAM(4,8),g=mulberry32(seed),w=[];for(let i=0;i<16;i++){w.push(pad(Math.floor(g()*256),8));r.write(pad(i,4),w[i])}let ok=0;for(let i=0;i<16;i++)if(r.read(pad(i,4)).data===w[i])ok++;return`${ok}/16`}));
+  T('TC07','Normal',"Truth table of A'B + AC","A'B + AC, 3 inputs",'00110101',safe(()=>exprTruth("A'B + AC",3).join('')));
+  T('TC08','Normal','Parentheses (A+B)C','(A+B)C, 3 inputs','00010101',safe(()=>exprTruth('(A+B)C',3).join('')));
+  T('TC09','Normal','XOR operator A^B^C','A^B^C, 3 inputs','01101001',safe(()=>exprTruth('A^B^C',3).join('')));
+  T('TC10','Normal','PLA implements full adder','Sum, Cout on PLA','Sum=01101001 Cout=00010111',safe(()=>{const r=compileToPLD('PLA',3,2,8,FULL_ADDER),t=pldTruth(r.pld);return`Sum=${t[0].join('')} Cout=${t[1].join('')}`}));
+  T('TC11','Normal','PAL implements full adder','Sum, Cout on PAL (4 terms/output)','Sum=01101001 Cout=00010111',safe(()=>{const r=compileToPLD('PAL',3,2,4,FULL_ADDER),t=pldTruth(r.pld);return`Sum=${t[0].join('')} Cout=${t[1].join('')}`}));
+  T('TC12','Normal','PLA and PAL agree','same functions on both','identical',safe(()=>{const a=compileToPLD('PLA',3,2,8,FULL_ADDER),b=compileToPLD('PAL',3,2,4,FULL_ADDER);return JSON.stringify(pldTruth(a.pld))===JSON.stringify(pldTruth(b.pld))?'identical':'different'}));
+  T('TC13','Edge','Invalid address (5 bits on 4-bit RAM)','W 10101←10101010','INVALID_ADDRESS, memory unchanged',safe(()=>{const r=new RAM(4,8),b=JSON.stringify(r.cells),x=r.write('10101','10101010');return`${x.code}, memory ${JSON.stringify(r.cells)===b?'unchanged':'CHANGED'}`}));
+  T('TC14','Edge','Invalid data (7 bits on 8-bit bus)','W 0001←1010101','INVALID_DATA, memory unchanged',safe(()=>{const r=new RAM(4,8),b=JSON.stringify(r.cells),x=r.write('0001','1010101');return`${x.code}, memory ${JSON.stringify(r.cells)===b?'unchanged':'CHANGED'}`}));
+  T('TC15','Edge','Read before write','R 0111 on empty RAM','UNINITIALIZED',safe(()=>new RAM(4,8).read('0111').code));
+  T('TC16','Edge','Stuck-at-0 caught by write/read','addr 0011 bit 3, pattern 11111111','DETECTED (read 11110111)',safe(()=>{const r=runFault(new RAM(4,8),'Stuck-at-0',{addr:'0011',bit:3,pattern:'11111111'});return`${r.detected?'DETECTED':'MISSED'} (read ${r.actual})`}));
+  T('TC17','Edge','Stuck-at-1 caught, March C- locates it','addr 1000 bit 0, pattern 00000000','DETECTED (read 00000001); March C- flags addr 8 bits [0]',safe(()=>{const r=new RAM(4,8),f=runFault(r,'Stuck-at-1',{addr:'1000',bit:0,pattern:'00000000'}),m=r.march(),h=m.fails.filter(x=>x.addr===8);
+    return`${f.detected?'DETECTED':'MISSED'} (read ${f.actual}); March C- ${h.length?`flags addr 8 bits [${[...new Set(h.flatMap(x=>x.bits))].join(',')}]`:'missed it'}`}));
+  T('TC18','Edge','Parity catches a bit flip','parity on; W 0100←10101010; flip bit 2','PARITY ERROR; clean cell OK',safe(()=>{const r=new RAM(4,8,true);r.write('0100','10101010');r.write('0101','01010101');r.flip(4,2);return`${r.read('0100').parityError?'PARITY ERROR':'no error'}; clean cell ${r.read('0101').parityError?'ERROR':'OK'}`}));
+  T('TC19','Edge','Address-line fault found by March C-','A2 stuck-at-0','March C- FAIL',safe(()=>{const r=new RAM(4,8);r.faults.push({type:'addr0',bit:2});return r.march().pass?'March C- PASS':'March C- FAIL'}));
+  T('TC20','Edge','Write collision leaves X bits','two drivers on 0110','DETECTED (XXXXXXXX)',safe(()=>{const r=runFault(new RAM(4,8),'Write Collision',{addr:'0110',bit:0,pattern:'10101010'});return`${r.detected?'DETECTED':'MISSED'} (${r.actual})`}));
+  T('TC21','Edge','Syntax error is rejected','A+*B','SYNTAX ERROR',safe(()=>{try{exprTruth('A+*B',3);return'ACCEPTED'}catch(e){return'SYNTAX ERROR'}}));
+  T('TC22','Edge','PAL rejects function needing 8 terms','A^B^C^D on PAL with 4 terms','REJECTED (needs 8 > 4)',safe(()=>{const r=compileToPLD('PAL',4,1,4,['A^B^C^D']);return r.ok?'ACCEPTED':`REJECTED (needs ${r.needed[0]} > 4)`}));
+  return out}
+/*CORE-END*/
+
+/* ============================================================
+   DOCUMENTATION TEXT (also downloadable from the About page)
+   ============================================================ */
+const README_MD=[
+'# Memory & PLD Educational Lab Simulator',
+'',
+'Course: EC2201 Digital Electronics, Unit IV - Memory and Programmable Logic Devices.',
+'',
+'An interactive, browser-based virtual lab for RAM, address decoding, PLA and PAL design, memory fault simulation, guided experiments, automated tests and printable reports.',
+'',
+'## How to run',
+'1. Keep index.html, README.md, requirements.txt and test_dataset.csv together in one folder.',
+'2. Open index.html in any modern browser (Chrome, Edge, Firefox, Safari). No server, install or internet connection is needed.',
+'3. Lab state is saved in the browser (localStorage). Use About > Reset lab to clear it.',
+'',
+'## What is implemented',
+'- Design modules: RAM model, address decoder, Boolean parser, Quine-McCluskey minimiser, PLA/PAL array model, fault engine, test runner.',
+'- Memory operations: configurable RAM (2-8 address bits, 4-16 data bits), WRITE, READ, reset, seeded fill, optional even-parity check.',
+'- Error simulation: invalid address, invalid data, read before write, stuck-at-0, stuck-at-1, bit flip, address-line stuck-at-0/1, write collision. Faults stay active in the RAM. March C- test locates them.',
+'- PLA/PAL editor: type Boolean expressions and compile them to a fuse map, or click fuses in the AND and OR planes. A PLA has a programmable OR plane. A PAL has a fixed OR plane with k terms per output.',
+'- Intermediate states: live signal path, decoder word lines, product-term values, truth tables with expected-vs-actual columns.',
+'- Experiments: 7 guided experiments, each executes real code and reports PASS or FAIL with tables.',
+'- Tests: 22 deterministic tests (12 normal, 10 edge/fault).',
+'- Reports: printable report and Markdown export. Datasets: seeded generator, CSV/JSON import and export, batch runner.',
+'',
+'## Assumptions',
+'- Memory is a word-addressable static RAM with one write port and one read port. Every cell starts empty (uninitialised).',
+'- Bit 0 is the least significant (rightmost) bit. Addresses are binary of exactly the configured width, or 0x hex.',
+'- Stuck-at faults force a cell bit on both write and read. Bit flips change the stored value only, so parity (computed at write time) can detect them.',
+'- An unprogrammed product term (no fuse connected) is treated as unused and outputs 0.',
+'- PLA and PAL support 2-4 inputs (A-D) and 1-3 outputs. PLA supports up to 16 product terms; PAL supports 1-8 fixed terms per output.',
+'- Expression grammar: variables A-D, apostrophe or ! or ~ = NOT, + = OR, ^ = XOR, adjacency or * or . = AND, parentheses, constants 0 and 1.',
+'',
+'## Input format',
+'Address: exactly N binary bits, e.g. 0010 for a 4-bit address, or 0x2.',
+'Data: exactly D binary bits, e.g. 10101010 for an 8-bit bus, or 0xAA.',
+'Dataset CSV columns: id,op,address,data,expect',
+'  op = READ or WRITE. data is required for WRITE. expect is optional: OK, the read value, INVALID_ADDRESS, INVALID_DATA or UNINITIALIZED.',
+'Dataset JSON: an array of {op,address,data,expect} objects, or {"ops":[...]}.',
+'',
+'## Reproducibility',
+'All random data comes from a seeded generator (mulberry32). The default seed is 2201. The same seed, address width and data width always produce the same dataset, experiments and tests.',
+'test_dataset.csv was produced with seed 2201, 4 address bits, 8 data bits and 30 operations. Its expected column comes from a separate reference model, so the batch runner compares the RAM against an independent implementation.',
+'',
+'## Files',
+'- index.html: the complete application (HTML, CSS, JavaScript).',
+'- README.md: this file.',
+'- requirements.txt: runtime requirements.',
+'- test_dataset.csv: sample input file for the batch runner.',
+'',
+'## Suggested deliverables checklist',
+'- Screenshots: capture each page (Memory Lab, PLA Designer, PAL Designer, Fault Simulator, Experiments, Test Cases, Datasets, Reports).',
+'- Short report: Reports page > Print / Save as PDF.',
+'- 3-5 minute demo: show a write/read, a fault injection with March C-, compile the full adder to PLA and PAL, run all tests.',
+'',
+'## References',
+'- M. Morris Mano and Michael D. Ciletti, Digital Design, Pearson.',
+'- Thomas L. Floyd, Digital Fundamentals, Pearson.',
+'- John F. Wakerly, Digital Design: Principles and Practices, Pearson.',
+'- A. J. van de Goor, Testing Semiconductor Memories: Theory and Practice (March tests).',
+'- W. V. Quine (1952) and E. J. McCluskey (1956), tabular minimisation of Boolean functions.',
+'- Your course notes for EC2201, Unit IV.',
+''].join('\n');
+const REQ_TXT=['# Runtime requirements','Browser: any modern browser with JavaScript enabled (Chrome, Edge, Firefox, Safari).','Server: none. Open index.html directly.','Network: none. No external libraries or fonts are loaded.','Python packages: none required.','','# Optional (only if you want to analyse exported CSV/JSON data in a notebook)','# numpy','# pandas','# matplotlib','# jupyter',''].join('\n');
+
+/* ============================================================
+   APPLICATION STATE
+   ============================================================ */
+const PAGES=['Dashboard','Memory Lab','PLA Designer','PAL Designer','Fault Simulator','Experiments','Test Cases','Datasets','Reports','About'];
+const ICONS=['⌂','▦','∧','∨','⚠','⚗','✓','▤','▥','ⓘ'];
+const PRESETS=[
+ {name:'Full adder (Sum, Cout)',n:3,m:2,exprs:FULL_ADDER,pla:8,pal:4},
+ {name:"Demo: A'B + AC and AB + A'C",n:3,m:2,exprs:["A'B + AC","AB + A'C"],pla:4,pal:2},
+ {name:'3-bit binary to Gray code',n:3,m:3,exprs:['A','A^B','B^C'],pla:6,pal:2},
+ {name:'2-bit comparator (AB vs CD)',n:4,m:2,exprs:["AC' + (A^C)'BD'","(A^C)'(B^D)'"],pla:8,pal:4}
+];
+function newCfg(kind,pi=0){const p=PRESETS[pi],cap=kind==='PLA'?p.pla:p.pal;const c={kind,n:p.n,m:p.m,cap,exprs:[...p.exprs],test:Array(p.n).fill(0),preset:pi,msg:'',ok:true,pld:null,manual:false};recompile(c);return c}
+function recompile(c){const r=compileToPLD(c.kind,c.n,c.m,c.cap,c.exprs);
+  if(r.ok){c.pld=r.pld;if(c.kind==='PLA')c.cap=r.pld.p;c.ok=true;c.manual=false;const cnt=pldCounts(r.pld);
+    c.msg=`Compiled ${c.kind}: ${r.per.map((l,o)=>`F${o+1} = ${l.length} term${l.length===1?'':'s'}`).join(', ')}. ${c.kind==='PLA'?`${cnt.used} distinct product terms in the array${r.grown?' (array grown to fit)':''}.`:`${c.cap} fixed terms per output.`}`}
+  else{c.pld=emptyPLD(c.kind,c.n,c.m,c.cap);c.ok=false;c.manual=false;c.msg=r.error}}
+function defaultState(){const s={v:2,page:'Dashboard',addrBits:4,dataBits:8,parity:false,seed:2201,addr:'0010',data:'10101010',lastOp:null,opResult:null,log:[],stats:{ops:0,detected:0},
+  fu:{type:'Stuck-at-0',addr:'0011',bit:3,pattern:'11111111'},faultResult:null,march:null,experiments:{},tests:null,ds:{seed:2201,count:30,ops:[],batch:null,msg:''},pld:{PLA:newCfg('PLA'),PAL:newCfg('PAL')}};
+  s.ram=new RAM(4,8);sampleInto(s.ram);return s}
+function sampleInto(ram){[0xAA,0xCC,0xF0,0x0F].forEach((v,i)=>ram.write(pad(i,ram.a),pad(v&(2**ram.d-1),ram.d)))}
+function load(){try{const j=JSON.parse(localStorage.getItem('mpld2')||'null');if(j&&j.v===2){j.ram=RAM.fromJSON(j.ram);return j}}catch(e){}return defaultState()}
+function save(){try{localStorage.setItem('mpld2',JSON.stringify({...S,ram:S.ram.toJSON()}))}catch(e){}}
+let S=load();
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $=q=>document.querySelector(q);
+const esc=s=>String(s??'').replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+function toast(s){const e=$('#toast');e.textContent=s;e.classList.remove('hidden');clearTimeout(window.tt);window.tt=setTimeout(()=>e.classList.add('hidden'),3200)}
+function record(s,isOp){S.log.unshift(new Date().toLocaleTimeString()+'  '+s);S.log=S.log.slice(0,80);if(isOp)S.stats.ops++;save()}
+function setPage(p){S.page=p;save();render();window.scrollTo(0,0)}
+function dl(name,text,type='text/plain'){const b=new Blob([text],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),500)}
+const bitsHtml=s=>`<span class="bits">${String(s).split('').map(c=>`<span class="bit ${c==='1'?'b1':c==='X'?'bx':''}">${c}</span>`).join('')}</span>`;
+const panel=(t,c)=>`<section class="panel">${t?`<h3>${t}</h3>`:''}${c}</section>`;
+const title=(t,s)=>`<div class="title"><h2>${t}</h2><p>${s}</p></div>`;
+const logHtml=(n=15)=>S.log.length?`<div class="log">${S.log.slice(0,n).map(x=>`<div><i>›</i>${esc(x)}</div>`).join('')}</div>`:`<p class="muted">No operations recorded yet. Write or read a word in the Memory Lab to start.</p>`;
+const stBadge=s=>`<span class="badge ${s==='PASS'?'pass':s==='FAIL'?'fail':''}">${s}</span>`;
+function simpleTable(head,rows){return`<div class="tablewrap"><table><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>{const t=String(c);const cls=t==='PASS'?'pass':t==='FAIL'?'fail':'';return`<td class="${cls} ${/^[01X]{3,}$/.test(t)?'mono':''}">${esc(t)}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`}
+function faultDesc(f){if(f.type==='stuck0'||f.type==='stuck1')return`Stuck-at-${f.type==='stuck1'?1:0} · address ${pad(f.addr,S.ram.a)} · bit ${f.bit}`;return`Address line A${f.bit} stuck-at-${f.type==='addr1'?1:0}`}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+function layout(content){const nf=S.ram.faults.length;
+  $('#app').innerHTML=`<div class="app"><aside id="side"><div class="brand"><div class="orb">∿</div><div><b>MEMORY & PLD</b><small>EDUCATIONAL LAB</small></div></div><nav aria-label="Pages">${PAGES.map((p,i)=>`<button class="${S.page===p?'active':''}" onclick="setPage('${p}')"${S.page===p?' aria-current="page"':''}><span>${ICONS[i]}</span>${p}</button>`).join('')}</nav></aside><main><header><button class="hamb" aria-label="Menu" onclick="$('#side').classList.toggle('open')">☰</button><div><small>EC2201 · DIGITAL ELECTRONICS · UNIT IV</small><h1>${S.page}</h1></div><span class="ready ${nf?'warnstat':''}">● ${nf?nf+' FAULT'+(nf>1?'S':'')+' ACTIVE':'SYSTEM READY'}</span></header>${content}</main></div>`}
+let rendering=false,pendingRender=false;
+function render(){if(rendering){pendingRender=true;return}rendering=true;try{renderNow()}finally{rendering=false}if(pendingRender){pendingRender=false;setTimeout(render,0)}}
+function renderNow(){const m={'Dashboard':dashboard,'Memory Lab':memoryPage,'PLA Designer':()=>designer('PLA'),'PAL Designer':()=>designer('PAL'),'Fault Simulator':faultPage,'Experiments':experimentsPage,'Test Cases':testsPage,'Datasets':datasetsPage,'Reports':reportsPage,'About':aboutPage};layout((m[S.page]||dashboard)())}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function dashboard(){const tp=S.tests?S.tests.list.filter(x=>x.status==='PASS').length:0,tn=S.tests?S.tests.list.length:0;const ep=Object.values(S.experiments).filter(x=>x.status==='PASS').length;
+  return`<div class="hero"><div><span class="eyebrow">VIRTUAL LABORATORY</span><h2>Explore memory and programmable logic.</h2><p>Write and read a real RAM model, inject faults and find them with March C-, program PLA and PAL fuse maps from Boolean expressions, and verify everything with experiments and automated tests.</p></div><div class="hero-art" aria-hidden="true">▣</div></div>
+  <div class="stats">${[['Memory operations',S.stats.ops],['Experiments passed',ep+' / '+EXPERIMENTS.length],['Tests passed',S.tests?tp+' / '+tn:'not run'],['Active RAM faults',S.ram.faults.length],['Faults detected',S.stats.detected]].map(x=>`<div class="stat"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}</div>
+  <div class="grid2">${panel('Quick actions',`<div class="actions">${['Memory Lab','PLA Designer','PAL Designer','Fault Simulator','Experiments','Datasets'].map(x=>`<button onclick="setPage('${x}')">${x}</button>`).join('')}</div><p class="note" style="margin-top:16px">Run a full check to execute all ${EXPERIMENTS.length} experiments and every test case in one click.</p><div class="actions"><button onclick="runEverything()">Run full verification</button></div>`)}
+  ${panel('Current setup',`<p class="note">RAM: <b>${S.ram.size} words × ${S.ram.d} bits</b> (${S.ram.a}-bit address), parity ${S.ram.parityOn?'on':'off'}.<br>PLA: ${S.pld.PLA.n} inputs, ${S.pld.PLA.m} outputs, ${S.pld.PLA.pld.p} product terms${S.pld.PLA.ok?'':' (<span class="fail">last compile failed</span>)'}.<br>PAL: ${S.pld.PAL.n} inputs, ${S.pld.PAL.m} outputs, ${S.pld.PAL.cap} fixed terms per output${S.pld.PAL.ok?'':' (<span class="fail">last compile failed</span>)'}.<br>Random seed: <b>${S.seed}</b></p>`)}</div>
+  ${panel('Recent activity',logHtml())}`}
+function runEverything(){const x={a:S.addrBits,d:S.dataBits,seed:S.seed};EXPERIMENTS.forEach((_,i)=>{S.experiments[i]=runExperiment(i,x)});S.tests={list:runTestSuite(S.seed),at:new Date().toLocaleString()};
+  const p=S.tests.list.filter(t=>t.status==='PASS').length,ep=Object.values(S.experiments).filter(e=>e.status==='PASS').length;record(`FULL VERIFICATION: ${ep}/${EXPERIMENTS.length} experiments, ${p}/${S.tests.list.length} tests passed`);toast(`Verification done: ${ep}/${EXPERIMENTS.length} experiments, ${p}/${S.tests.list.length} tests passed`);render()}
+
+/* ============================================================
+   MEMORY LAB
+   ============================================================ */
+function decoderHtml(addr){const pa=S.ram.parseAddr(addr);if(!pa.ok)return`<p class="result danger" style="margin:0">${esc(pa.msg)}</p>`;const eff=S.ram.decode(pa.v),L=decoderLines(S.ram.a,eff);
+  return`<div class="decoder" role="img" aria-label="Word line ${eff} active">${L.map((b,i)=>`<div class="dl ${b?'on':''}" title="Word line ${i}">${i}</div>`).join('')}</div><p class="note" style="margin:8px 0 0">Address <span class="mono">${pad(pa.v,S.ram.a)}</span> activates word line <b>${eff}</b>${eff!==pa.v?` <span class="amberc">(address-line fault redirected it from ${pa.v})</span>`:''}.</p>`}
+function busHtml(){const o=S.lastOp,a=S.ram.a;const ad=o?pad(o.addr,a):'-'.repeat(a),dt=o?o.data:'-'.repeat(S.ram.d);
+  return`<div class="path"><div class="pnode"><b>CPU</b><span><span class="sig ${o&&o.op==='WRITE'?'hi':''}">WE ${o&&o.op==='WRITE'?1:0}</span> <span class="sig ${o&&o.op==='READ'?'hi':''}">RE ${o&&o.op==='READ'?1:0}</span></span></div><div class="parrow">→</div>
+  <div class="pnode"><b>Address bus</b>${bitsHtml(ad)}</div><div class="parrow">→</div>
+  <div class="pnode ${o?'on':''}"><b>Decoder</b><span>${o?'word line '+o.eff:'idle'}</span></div><div class="parrow">→</div>
+  <div class="pnode ${o?'on':''}"><b>RAM array</b><span>${S.ram.size} × ${S.ram.d}</span></div><div class="parrow">${o&&o.op==='WRITE'?'←':'→'}</div>
+  <div class="pnode"><b>Data bus</b>${bitsHtml(dt)}</div></div><p class="note" style="margin:12px 0 0">${o?`Last cycle: ${o.op} ${o.ok===false?'(failed)':''}`:'Run a WRITE or READ to see the signals travel through the path.'}</p>`}
+function memoryPage(){const ram=S.ram,sel=ram.parseAddr(S.addr);const selIdx=sel.ok?sel.v:-1;const r=S.opResult;
+  const rows=ram.cells.map((v,i)=>{const fault=ram.faults.some(f=>(f.type==='stuck0'||f.type==='stuck1')&&f.addr===i);let st;if(v==null)st='<span class="muted">EMPTY</span>';else if(v.includes('X'))st='<span class="fail">CONTENTION</span>';else if(fault)st='<span class="amberc">STUCK BIT</span>';else st='<span class="pass">WRITTEN</span>';
+    let pc='';if(ram.parityOn)pc=`<td class="mono">${v==null?'-':(v.includes('X')?'ERR':ram.par[i]+(par1(v)!==ram.par[i]?' ✗':' ✓'))}</td>`;
+    return`<tr class="clickable ${i===selIdx?'selected':''}" tabindex="0" onclick="selectMem(${i})" onkeydown="if(event.key==='Enter')selectMem(${i})"><td>${i}</td><td class="mono">${pad(i,ram.a)}</td><td>0x${i.toString(16).toUpperCase()}</td><td class="mono">${v||'-'.repeat(ram.d)}</td><td class="mono">${v&&!v.includes('X')?'0x'+hexOf(v):'—'}</td>${pc}<td>${st}</td></tr>`}).join('');
+  return title('Memory Lab','Configure the RAM, write and read words by address, watch the decoder select a word line, and inspect every cell.')+
+  `<div class="grid2">${panel('Configuration',`<div class="form inline"><label>Address bits (2–8)<input type="number" min="2" max="8" value="${ram.a}" onchange="setBits('a',this.value)"></label><label>Data bits (4–16)<input type="number" min="4" max="16" value="${ram.d}" onchange="setBits('d',this.value)"></label><label>Seed<input type="number" value="${S.seed}" onchange="S.seed=Math.max(0,parseInt(this.value)||0);save()"></label></div>
+   <label class="check form" style="margin:0 0 14px"><input type="checkbox" ${ram.parityOn?'checked':''} onchange="setParity(this.checked)"> Even-parity check on every word</label>
+   <div class="actions"><button class="secondary" onclick="resetMem()">Reset memory</button><button class="secondary" onclick="loadSample()">Load 4 sample words</button><button class="secondary" onclick="fillRandom()">Fill with seeded data</button></div><p class="note">Changing the widths clears the RAM. Reset keeps active faults. Fault Simulator manages them.</p>`)}
+   ${panel('Signal path',busHtml())}</div>
+  ${panel('Memory operation',`<div class="grid2"><div><div class="form"><label>Address (${ram.a} binary bits, or 0x hex)<input id="addr" class="mono" value="${esc(S.addr)}" oninput="S.addr=this.value;$('#dec').innerHTML=decoderHtml(this.value);save()" placeholder="${pad(0,ram.a)}" autocomplete="off"></label><label>Data (${ram.d} binary bits, or 0x hex)<input id="data" class="mono" value="${esc(S.data)}" oninput="S.data=this.value;save()" placeholder="${'1'.repeat(ram.d)}" autocomplete="off"></label></div>
+   <div class="actions"><button onclick="doWrite()">WRITE</button><button onclick="doRead()">READ</button></div>${r?`<div class="result ${r.kind}" role="status">${r.html}</div>`:''}</div>
+   <div><div class="muted" style="margin-bottom:8px;font-size:12px">Address decoder · word lines</div><div id="dec">${decoderHtml(S.addr)}</div></div></div>`)}
+  ${ram.faults.length?panel('Active faults',`<p class="note">These faults are part of the RAM and affect every write and read.</p><div class="actions">${ram.faults.map((f,i)=>`<span class="chip">${esc(faultDesc(f))}</span>`).join('')}</div><div class="actions" style="margin-top:12px"><button class="secondary small" onclick="setPage('Fault Simulator')">Manage in Fault Simulator</button></div>`):''}
+  ${panel('Memory table · '+ram.size+' locations',`<div class="tablewrap"><table><thead><tr><th>Word</th><th>Address</th><th>Hex</th><th>Data (binary)</th><th>Data (hex)</th>${ram.parityOn?'<th>Parity</th>':''}<th>Status</th></tr></thead><tbody>${rows}</tbody></table></div><p class="note">Click a row to load its address.</p>`)}
+  ${panel('Operation log',logHtml())}`}
+function setBits(k,v){const lim=k==='a'?[2,8]:[4,16];const n=Math.max(lim[0],Math.min(lim[1],parseInt(v)||lim[0]));const a=k==='a'?n:S.ram.a,d=k==='d'?n:S.ram.d;S.ram=new RAM(a,d,S.ram.parityOn);S.addrBits=a;S.dataBits=d;S.addr=pad(0,a);S.data='1'.repeat(Math.min(d,4)).padEnd(d,'0');S.lastOp=null;S.opResult=null;S.fu.addr=pad(Math.min(3,2**a-1),a);S.fu.pattern='1'.repeat(d);S.fu.bit=Math.min(S.fu.bit,d-1);S.march=null;S.faultResult=null;record(`MEMORY CONFIGURED ${a}-bit address × ${d}-bit data (cleared)`);toast('Memory reconfigured and cleared');render()}
+function setParity(v){S.ram.parityOn=v;record('PARITY '+(v?'enabled':'disabled'));render()}
+function selectMem(i){S.addr=pad(i,S.ram.a);save();render()}
+function resetMem(){if(confirm('Clear all memory contents? Active faults are kept.')){const f=S.ram.faults;S.ram=new RAM(S.ram.a,S.ram.d,S.ram.parityOn);S.ram.faults=f;S.lastOp=null;S.opResult=null;record('MEMORY RESET');toast('Memory cleared');render()}}
+function loadSample(){sampleInto(S.ram);record('SAMPLE WORDS loaded at addresses 0–3',true);toast('4 sample words written');render()}
+function fillRandom(){const g=mulberry32(S.seed);for(let i=0;i<S.ram.size;i++)S.ram.write(pad(i,S.ram.a),pad(Math.floor(g()*2**S.ram.d),S.ram.d));record(`FILL ${S.ram.size} words with seeded data (seed ${S.seed})`,true);toast('RAM filled with seed '+S.seed);render()}
+function doWrite(){S.addr=$('#addr').value;S.data=$('#data').value;const r=S.ram.write(S.addr,S.data);
+  if(!r.ok){S.opResult={kind:'danger',html:`<b>WRITE rejected · ${r.code}</b><br>${esc(r.msg)}<br>Memory was not changed.`};record(`ERROR WRITE ${S.addr} ← ${S.data}: ${r.code}`,true);S.lastOp=null}
+  else{const A=pad(r.addr,S.ram.a),alias=r.eff!==r.addr,mod=r.stored!==r.data;S.lastOp={op:'WRITE',ok:true,addr:r.addr,eff:r.eff,data:r.stored};
+    S.opResult={kind:alias||mod?'warn':'ok',html:`<b>WRITE ${A} ← <span class="mono">${r.data}</span></b>${alias?`<br>Address-line fault: the word was stored at ${pad(r.eff,S.ram.a)} instead.`:''}${mod?`<br>Stuck-at fault: the cell now holds <span class="mono">${r.stored}</span>.`:''}`};record(`WRITE ${A} ← ${r.data}${alias?' (aliased to '+pad(r.eff,S.ram.a)+')':''}${mod?' (stuck bit → '+r.stored+')':''}`,true)}
+  save();render()}
+function doRead(){S.addr=$('#addr').value;S.data=$('#data').value;const r=S.ram.read(S.addr);
+  if(!r.ok){S.opResult={kind:r.code==='UNINITIALIZED'?'warn':'danger',html:`<b>READ failed · ${r.code}</b><br>${esc(r.msg)}`};record(`ERROR READ ${S.addr}: ${r.code}`,true);S.lastOp=r.code==='UNINITIALIZED'?{op:'READ',ok:false,addr:r.addr,eff:r.eff,data:'-'.repeat(S.ram.d)}:null}
+  else{const A=pad(r.addr,S.ram.a);S.lastOp={op:'READ',ok:true,addr:r.addr,eff:r.eff,data:r.data};
+    const bad=r.parityError||r.contention;S.opResult={kind:bad?'danger':r.eff!==r.addr?'warn':'ok',html:`<b>READ ${A} → <span class="mono">${r.data}</span></b>${r.parityError?'<br><b>PARITY ERROR</b>: the word does not match its stored parity bit.':''}${r.contention?'<br>Bus contention: X bits are undefined.':''}${r.eff!==r.addr?`<br>Address-line fault: data came from word ${pad(r.eff,S.ram.a)}.`:''}<br>Hex 0x${hexOf(r.data)} · decimal ${/^[01]+$/.test(r.data)?parseInt(r.data,2):'—'}`};
+    record(`READ ${A} → ${r.data}${r.parityError?' PARITY ERROR':''}`,true)}
+  save();render()}
+
+/* ============================================================
+   PLA / PAL DESIGNER
+   ============================================================ */
+function fuseMap(c){const d=c.pld,n=d.n,m=d.m,p=d.p,cw=46,rh=34,ml=70,mt=76,gap=60;const ev=pldEval(d,c.test.reduce((a,b)=>a*2+b,0)),om=pldOr(d),isPLA=d.kind==='PLA';
+  const orX=ml+2*n*cw+gap,W=orX+m*cw+64,H=mt+p*rh+66;let s=`<svg class="fuse" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${d.kind} fuse map with ${p} product terms">`;
+  s+=`<text class="hd" x="${ml+n*cw}" y="14" text-anchor="middle">AND PLANE</text><text class="hd" x="${orX+m*cw/2}" y="14" text-anchor="middle">OR PLANE${isPLA?'':' (FIXED)'}</text>`;
+  for(let k=0;k<2*n;k++){const x=ml+(k+.5)*cw;s+=`<line class="lit ${ev.lit[k]?'hi':''}" x1="${x}" y1="${mt-20}" x2="${x}" y2="${mt+p*rh}"/><text class="lbl" x="${x}" y="${mt-28}" text-anchor="middle">${VARS[k>>1]}${k&1?"'":''}</text>`}
+  for(let o=0;o<m;o++){const x=orX+(o+.5)*cw;s+=`<line class="outl ${ev.outs[o]?'hi':''}" x1="${x}" y1="${mt-20}" x2="${x}" y2="${mt+p*rh+8}"/><text class="lbl" x="${x}" y="${mt-28}" text-anchor="middle">F${o+1}</text><text class="val ${ev.outs[o]?'':'z'}" x="${x}" y="${mt+p*rh+26}" text-anchor="middle">${ev.outs[o]}</text>`}
+  for(let t=0;t<p;t++){const y=mt+(t+.5)*rh;s+=`<line class="term ${ev.terms[t]?'hi':''}" x1="${ml-4}" y1="${y}" x2="${orX+m*cw}" y2="${y}"/><text class="lbl" x="${ml-10}" y="${y+4}" text-anchor="end">P${t+1}</text><text class="val ${ev.terms[t]?'':'z'}" x="${orX+m*cw+14}" y="${y+4}">${ev.terms[t]}</text>`;
+    for(let k=0;k<2*n;k++){const x=ml+(k+.5)*cw;s+=`<g class="cell" tabindex="0" role="button" aria-label="AND fuse P${t+1} ${VARS[k>>1]}${k&1?"'":''} ${d.and[t][k]?'connected':'open'}" onclick="toggleFuse('${d.kind}','and',${t},${k})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFuse('${d.kind}','and',${t},${k})}"><rect class="hit" x="${x-cw/2}" y="${y-rh/2}" width="${cw}" height="${rh}"/>${d.and[t][k]?`<circle class="dot" cx="${x}" cy="${y}" r="6.5"/>`:`<circle class="ghost" cx="${x}" cy="${y}" r="3"/>`}</g>`}
+    for(let o=0;o<m;o++){const x=orX+(o+.5)*cw;if(isPLA)s+=`<g class="cell" tabindex="0" role="button" aria-label="OR fuse P${t+1} F${o+1} ${d.or[t][o]?'connected':'open'}" onclick="toggleFuse('PLA','or',${t},${o})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFuse('PLA','or',${t},${o})}"><rect class="hit" x="${x-cw/2}" y="${y-rh/2}" width="${cw}" height="${rh}"/>${d.or[t][o]?`<circle class="dot" cx="${x}" cy="${y}" r="6.5"/>`:`<circle class="ghost" cx="${x}" cy="${y}" r="3"/>`}</g>`;else if(om[t][o])s+=`<circle class="dotfixed" cx="${x}" cy="${y}" r="5.5"/>`}}
+  return s+'</svg>'}
+function designer(kind){const c=S.pld[kind],d=c.pld,isPLA=kind==='PLA',tt=pldTruth(d),cnt=pldCounts(d);
+  const tgt=c.exprs.slice(0,d.m).map(e=>{try{return exprTruth(e,d.n)}catch(x){return null}}),rowsN=2**d.n;let mism=0;
+  const trs=Array.from({length:rowsN},(_,i)=>{const e=pldEval(d,i);let ok=true;const cells=e.outs.map((v,o)=>{const t=tgt[o]?tgt[o][i]:'?';if(tgt[o]&&t!==v)ok=false;return`<td class="mono">${v}</td><td class="mono muted">${t}</td>`}).join('');if(!ok)mism++;
+    return`<tr class="${ok?'':'mism'}">${e.bits.map(b=>`<td class="mono">${b}</td>`).join('')}${e.terms.map(t=>`<td class="mono ${t?'pass':'muted'}">${t}</td>`).join('')}${cells}<td>${ok?'<span class="pass">✓</span>':'<span class="fail">✗</span>'}</td></tr>`}).join('');
+  const anyBad=tgt.some(x=>x===null);
+  const verify=anyBad?`<div class="result warn">A target expression has a syntax error, so the array cannot be compared with it.</div>`:mism?`<div class="result danger"><b>${mism} of ${rowsN} rows differ</b> from the target expressions${c.manual?' because the fuse map was edited by hand':''}. Click Compile to rebuild the array, or keep editing fuses.</div>`:`<div class="result ok"><b>Verified:</b> the fuse map matches the target expressions on all ${rowsN} input combinations.</div>`;
+  return title(kind+' Designer',isPLA?'A PLA has a programmable AND plane and a programmable OR plane. Terms can be shared between outputs.':'A PAL has a programmable AND plane and a fixed OR plane. Each output owns a fixed number of product terms.')+
+  panel('1 · Choose a function and size',`<div class="form inline"><label>Preset<select onchange="applyPreset('${kind}',+this.value)">${PRESETS.map((p,i)=>`<option value="${i}" ${c.preset===i?'selected':''}>${esc(p.name)}</option>`).join('')}</select></label>
+   <label>Inputs<select onchange="setStruct('${kind}','n',+this.value)">${[2,3,4].map(v=>`<option ${c.n===v?'selected':''}>${v}</option>`).join('')}</select></label>
+   <label>Outputs<select onchange="setStruct('${kind}','m',+this.value)">${[1,2,3].map(v=>`<option ${c.m===v?'selected':''}>${v}</option>`).join('')}</select></label>
+   <label>${isPLA?'Product terms (2–16)':'Terms per output (1–8)'}<input type="number" min="${isPLA?2:1}" max="${isPLA?16:8}" value="${c.cap}" onchange="setStruct('${kind}','cap',+this.value)"></label></div>`)+
+  panel('2 · Boolean expressions',`<div class="form">${Array.from({length:c.m},(_,o)=>`<label>F${o+1} =<input class="mono" id="ex-${o}" value="${esc(c.exprs[o]??'')}" onchange="setExpr('${kind}',${o},this.value)" onkeydown="if(event.key==='Enter'){setExpr('${kind}',${o},this.value);compileNow('${kind}')}" autocomplete="off" spellcheck="false"></label>`).join('')}</div>
+   <p class="note">Variables ${VARS.slice(0,c.n).join(', ')} · <b>'</b> or <b>!</b> = NOT · <b>+</b> = OR · <b>^</b> = XOR · adjacency, <b>*</b> or <b>.</b> = AND · parentheses. Example: <span class="mono">A'B + AC</span></p>
+   <div class="actions"><button onclick="compileNow('${kind}')">Compile to fuse map</button></div><div class="result ${c.ok?'ok':'danger'}" role="status">${esc(c.msg)}</div>`)+
+  panel('3 · Fuse map (click a crosspoint to program or blow a fuse)',`<div class="actions" style="margin-bottom:12px"><span class="muted">Test input:</span>${c.test.map((b,j)=>`<span class="sw">${VARS[j]}<button class="small ${b?'on':''}" aria-pressed="${!!b}" onclick="setTest('${kind}',${j})">${b}</button></span>`).join('')}<span class="muted">Row ${pad(c.test.reduce((a,b)=>a*2+b,0),c.n)} · green lines are logic 1</span></div><div class="fusewrap">${fuseMap(c)}</div>
+   <p class="note">Amber dots are programmed fuses${isPLA?'':'; grey dots are the fixed OR connections'}. An open AND row (no fuses) is unused and outputs 0.</p>`)+
+  `<div class="grid2">${panel('Array read back as expressions',`<div class="form"><div class="log">${pldExprs(d).map((e,o)=>`<div><i>F${o+1}</i> ${esc(e)}</div>`).join('')}</div></div>`)}
+   ${panel('Resource usage',simpleTable(['Metric','Value'],[['Product terms in use',`${cnt.used} of ${d.p}`],['AND fuses programmed',cnt.andFuses],['OR fuses programmed',isPLA?cnt.orFuses:'fixed'],['OR plane',isPLA?'programmable':`fixed, ${d.k} terms per output`]]))}</div>`+
+  panel('4 · Truth table with intermediate product terms',verify+`<div class="tablewrap free" style="max-height:480px;margin-top:12px"><table><thead><tr>${VARS.slice(0,d.n).map(v=>`<th>${v}</th>`).join('')}${Array.from({length:d.p},(_,t)=>`<th>P${t+1}</th>`).join('')}${Array.from({length:d.m},(_,o)=>`<th>F${o+1}</th><th>F${o+1} target</th>`).join('')}<th>OK</th></tr></thead><tbody>${trs}</tbody></table></div>`)}
+function applyPreset(kind,i){const p=PRESETS[i],c=S.pld[kind];c.preset=i;c.n=p.n;c.m=p.m;c.exprs=[...p.exprs];c.cap=kind==='PLA'?p.pla:p.pal;c.test=Array(p.n).fill(0);recompile(c);record(`${kind} preset: ${p.name}`);render()}
+function setStruct(kind,f,v){const c=S.pld[kind];if(f==='cap')v=Math.max(kind==='PLA'?2:1,Math.min(kind==='PLA'?16:8,v||1));c[f]=v;while(c.exprs.length<c.m)c.exprs.push('0');c.test=Array(c.n).fill(0);recompile(c);save();render()}
+function setExpr(kind,o,v){S.pld[kind].exprs[o]=v;save()}
+function compileNow(kind){const c=S.pld[kind];recompile(c);record(`${kind} COMPILE ${c.ok?'ok':'error'}: ${c.msg.slice(0,90)}`);save();render()}
+function toggleFuse(kind,plane,t,k){const c=S.pld[kind],d=c.pld;if(plane==='and')d.and[t][k]=!d.and[t][k];else d.or[t][k]=!d.or[t][k];c.manual=true;save();render()}
+function setTest(kind,j){const c=S.pld[kind];c.test[j]^=1;save();render()}
+
+/* ============================================================
+   FAULT SIMULATOR
+   ============================================================ */
+const FUSES={'Invalid Address':['addr'],'Invalid Data':['pattern'],'Read Before Write':['addr'],'Stuck-at-0':['addr','bit','pattern'],'Stuck-at-1':['addr','bit','pattern'],'Bit Flip':['addr','bit','pattern'],'Address Line Stuck-at-0':['addr','line','pattern'],'Address Line Stuck-at-1':['addr','line','pattern'],'Write Collision':['addr','pattern']};
+const FAULT_HELP={'Invalid Address':['Address outside the RAM range or with the wrong width.','The decoder input check rejects it before any cell is touched.'],'Invalid Data':['Data wider or narrower than the data bus.','The bus-width check rejects it and memory stays unchanged.'],'Read Before Write':['Reading a word that was never written.','A valid flag per word marks uninitialised cells.'],'Stuck-at-0':['A cell output is permanently 0.','Write the complement, read back, compare. March C- finds it on any pattern.'],'Stuck-at-1':['A cell output is permanently 1.','Same as stuck-at-0 with the opposite pattern.'],'Bit Flip':['A stored bit changes by itself (single-event upset).','Parity check on read, or comparison with the expected value.'],'Address Line Stuck-at-0':['An address input is always 0 (or always 1). Two addresses alias to one cell.','Write different data to both addresses and read back. March C- finds it.'],'Address Line Stuck-at-1':['An address input is always 1. Two addresses alias to one cell.','Write different data to both addresses and read back. March C- finds it.'],'Write Collision':['Two sources drive the same word in one cycle.','Conflicting bits become X (undefined) and the read reports contention.']};
+function faultPage(){const f=S.fu,u=FUSES[f.type],r=S.faultResult,m=S.march,ram=S.ram;
+  return title('Fault Simulator','Inject a fault into the real RAM, see each step of the test, and compare expected with actual behaviour.')+
+  `<div class="grid2">${panel('Fault configuration',`<div class="form"><label>Fault type<select id="fu-type" onchange="setFaultType(this.value)">${FAULT_TYPES.map(x=>`<option ${f.type===x?'selected':''}>${x}</option>`).join('')}</select></label>
+   ${u.includes('addr')?`<label>Target address<input id="fu-addr" class="mono" value="${esc(f.addr)}" oninput="S.fu.addr=this.value" autocomplete="off"></label>`:''}
+   ${u.includes('bit')?`<label>Faulty bit (0 = least significant, max ${ram.d-1})<input id="fu-bit" type="number" min="0" max="${ram.d-1}" value="${f.bit}" oninput="S.fu.bit=this.value"></label>`:''}
+   ${u.includes('line')?`<label>Address line (A0–A${ram.a-1})<input id="fu-bit" type="number" min="0" max="${ram.a-1}" value="${Math.min(f.bit,ram.a-1)}" oninput="S.fu.bit=this.value"></label>`:''}
+   ${u.includes('pattern')?`<label>Test pattern (${ram.d} bits)<input id="fu-pat" class="mono" value="${esc(f.pattern)}" oninput="S.fu.pattern=this.value" autocomplete="off"></label>`:''}</div>
+   <p class="note"><b>What it is:</b> ${FAULT_HELP[f.type][0]}<br><b>How it is detected:</b> ${FAULT_HELP[f.type][1]}</p>
+   <div class="actions"><button onclick="injectFault()">Inject fault and test</button><button class="secondary" onclick="runMarch()">Run March C- on RAM</button><button class="secondary" onclick="clearFaults()">Clear all faults</button></div>`)}
+   ${panel('Result',r?`<div class="result ${r.detected?'danger':'warn'}"><b>${r.detected?'FAULT DETECTED':'NOT DETECTED'}</b><br>${esc(r.summary)}</div><p class="note" style="margin-top:14px">Expected <span class="mono">${esc(r.expected)}</span> · Actual <span class="mono">${esc(r.actual)}</span></p><div class="log">${r.steps.map((s,i)=>`<div><i>${i+1}</i>${esc(s.step)} <span class="muted">→ ${esc(s.detail)}</span></div>`).join('')}</div>`:`<p class="muted">Choose a fault and press Inject fault and test. Every step will be listed here.</p>`)}</div>
+  ${panel('Active faults in the RAM',ram.faults.length?`<div class="tablewrap free"><table><thead><tr><th>#</th><th>Fault</th><th></th></tr></thead><tbody>${ram.faults.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(faultDesc(x))}</td><td><button class="small secondary" onclick="removeFault(${i})">Remove</button></td></tr>`).join('')}</tbody></table></div>`:`<p class="muted">No persistent faults. Stuck-at, address-line faults stay in the RAM after injection.</p>`)}
+  ${m?panel('March C- result',`<div class="result ${m.pass?'ok':'danger'}"><b>${m.pass?'PASS: no fault found':'FAIL: '+m.fails.length+' failing reads'}</b><br>${m.ops} memory operations on a scratch copy of the RAM (your data is untouched). Sequence: ⇑(w0) ⇑(r0,w1) ⇑(r1,w0) ⇓(r0,w1) ⇓(r1,w0) ⇓(r0).</div>${m.fails.length?`<div class="tablewrap" style="margin-top:12px;max-height:300px"><table><thead><tr><th>Element</th><th>Address</th><th>Expected</th><th>Actual</th><th>Faulty bits</th></tr></thead><tbody>${m.fails.slice(0,40).map(x=>`<tr><td>${x.elem}</td><td class="mono">${pad(x.addr,ram.a)}</td><td class="mono">${x.expected}</td><td class="mono">${x.actual}</td><td>${x.bits.join(', ')||'—'}</td></tr>`).join('')}</tbody></table></div>`:''}`):''}
+  ${panel('Fault reference',simpleTable(['Fault','Effect','Detection'],FAULT_TYPES.map(x=>[x,FAULT_HELP[x][0],FAULT_HELP[x][1]])))}`}
+function setFaultType(t){const f=S.fu,ram=S.ram;f.type=t;f.addr=pad(Math.min(3,ram.size-1),ram.a);f.pattern=(t.startsWith('Stuck-at-1')?'0':'1').repeat(ram.d);f.bit=Math.min(t.startsWith('Address')?1:3,t.startsWith('Address')?ram.a-1:ram.d-1);
+  if(t==='Invalid Address')f.addr='1'+pad(0,ram.a);if(t==='Invalid Data')f.pattern='1'.repeat(ram.d+1);
+  if(t==='Read Before Write'){let i=ram.cells.findIndex(x=>x==null);if(i<0)i=0;f.addr=pad(i,ram.a)}
+  if(t==='Bit Flip')f.pattern='10101010'.repeat(2).slice(0,ram.d);save();render()}
+function syncFault(){const g=id=>document.getElementById(id);if(g('fu-addr'))S.fu.addr=g('fu-addr').value;if(g('fu-bit'))S.fu.bit=g('fu-bit').value;if(g('fu-pat'))S.fu.pattern=g('fu-pat').value}
+function injectFault(){syncFault();const f=S.fu,res=runFault(S.ram,f.type,{addr:f.addr,bit:+f.bit,pattern:f.pattern});S.faultResult=res;S.lastOp=null;if(res.detected)S.stats.detected++;record(`FAULT ${f.type} → ${res.detected?'DETECTED':'NOT DETECTED'}: ${res.summary}`);save();render()}
+function runMarch(){S.march=S.ram.march();record(`MARCH C- ${S.march.pass?'PASS':'FAIL ('+S.march.fails.length+' failing reads)'}`);save();render()}
+function clearFaults(){S.ram.faults=[];S.faultResult=null;S.march=null;record('ALL FAULTS cleared (cell contents kept)');toast('Faults cleared. Reset memory to clear forced cell values.');render()}
+function removeFault(i){S.ram.faults.splice(i,1);record('FAULT removed');render()}
+
+/* ============================================================
+   EXPERIMENTS
+   ============================================================ */
+function experimentsPage(){const done=S.experiments;const x=(i)=>done[i];
+  return title('Experiment Lab','Each experiment runs real code with your current RAM size and seed, then shows tables and a pass/fail verdict.')+
+  `<div class="steps">${['Configure','Enter inputs','Run simulation','View state','Verify output','Generate report'].map((t,i)=>`<div class="step"><b>STEP ${i+1}</b><span>${t}</span></div>`).join('')}</div>
+  <p class="note">Configure = RAM size and seed in the Memory Lab. Inputs come from the seed and the presets. Report = the Reports page.</p>
+  ${panel('Experiments',`<div class="actions" style="margin-bottom:14px"><button onclick="runAllExperiments()">Run all experiments</button><span class="muted">RAM ${S.ram.a}-bit × ${S.ram.d}-bit · seed ${S.seed}</span></div>${EXPERIMENTS.map((e,i)=>{const r=x(i);return`<details class="exp" ${r?'':''}><summary><div style="flex:1"><b>Experiment ${i+1} · ${esc(e.name)}</b><div class="muted">${esc(e.desc)}</div></div>${r?stBadge(r.status):'<span class="muted">not run</span>'}<button class="small" onclick="event.preventDefault();runOneExp(${i})">Run</button></summary><div class="body">${r?`<p class="note"><b>${esc(r.summary)}</b><br>Run at ${esc(r.at)}</p>${r.tables.map(t=>`<h4>${esc(t.title)}</h4>${simpleTable(t.head,t.rows)}`).join('')}`:'<p class="muted">Press Run to execute this experiment.</p>'}</div></details>`}).join('')}`)}`}
+function runOneExp(i){S.experiments[i]=runExperiment(i,{a:S.addrBits,d:S.dataBits,seed:S.seed});record(`EXPERIMENT ${i+1} ${S.experiments[i].status}: ${EXPERIMENTS[i].name}`);save();render();const d=document.querySelectorAll('details.exp')[i];if(d)d.open=true}
+function runAllExperiments(){EXPERIMENTS.forEach((_,i)=>{S.experiments[i]=runExperiment(i,{a:S.addrBits,d:S.dataBits,seed:S.seed})});const p=Object.values(S.experiments).filter(e=>e.status==='PASS').length;record(`ALL EXPERIMENTS: ${p}/${EXPERIMENTS.length} passed`);toast(`${p}/${EXPERIMENTS.length} experiments passed`);render()}
+
+/* ============================================================
+   TEST CASES
+   ============================================================ */
+function testsPage(){const t=S.tests;
+  return title('Automated Test Cases','22 deterministic tests: 12 normal cases and 10 edge or fault cases. Each test runs the real RAM, parser and PLA/PAL code on fresh instances and compares actual with expected.')+
+  `<div class="actions no-print"><button onclick="runTests()">Run all tests</button><span class="muted">Seed ${S.seed}</span></div><div style="height:16px"></div>`+
+  (t?panel('Results',`<div class="stats">${[['Total',t.list.length],['Passed',t.list.filter(x=>x.status==='PASS').length],['Failed',t.list.filter(x=>x.status==='FAIL').length],['Normal',t.list.filter(x=>x.kind==='Normal').length],['Edge / fault',t.list.filter(x=>x.kind==='Edge').length]].map(x=>`<div class="stat"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}</div><p class="note">Run at ${esc(t.at)}</p><div class="tablewrap free"><table><thead><tr><th>ID</th><th>Type</th><th>Test case</th><th>Input</th><th>Expected</th><th>Actual</th><th>Status</th></tr></thead><tbody>${t.list.map(x=>`<tr class="${x.status==='FAIL'?'mism':''}"><td>${x.id}</td><td>${x.kind}</td><td>${esc(x.name)}</td><td class="muted">${esc(x.input)}</td><td class="mono">${esc(x.expected)}</td><td class="mono">${esc(x.actual)}</td><td class="${x.status==='PASS'?'pass':'fail'}">${x.status}</td></tr>`).join('')}</tbody></table></div>`):panel('Ready',`<p class="muted">Press Run all tests to execute the suite.</p>`))}
+function runTests(){S.tests={list:runTestSuite(S.seed),at:new Date().toLocaleString()};const p=S.tests.list.filter(x=>x.status==='PASS').length;record(`TEST SUITE: ${p}/${S.tests.list.length} passed`);toast(`${p}/${S.tests.list.length} tests passed`);render()}
+
+/* ============================================================
+   DATASETS
+   ============================================================ */
+function datasetsPage(){const ds=S.ds,b=ds.batch,ram=S.ram;
+  return title('Datasets','Generate reproducible synthetic operations from a seed, import your own CSV or JSON, run them against the RAM and compare every result with an independent reference model.')+
+  `<div class="grid2">${panel('Generate synthetic data',`<div class="form inline"><label>Seed<input id="ds-seed" type="number" value="${ds.seed}"></label><label>Operations<input id="ds-count" type="number" min="5" max="500" value="${ds.count}"></label></div><p class="note">Uses the current RAM shape: ${ram.a}-bit address, ${ram.d}-bit data. About one in five operations is a deliberate edge case (bad address, bad data width, read before write).</p><div class="actions"><button onclick="genData()">Generate</button><button class="secondary" onclick="dsDownload('csv')" ${ds.ops.length?'':'disabled'}>Download CSV</button><button class="secondary" onclick="dsDownload('json')" ${ds.ops.length?'':'disabled'}>Download JSON</button></div>`)}
+  ${panel('Import a dataset',`<div class="form"><label>CSV (id,op,address,data,expect) or JSON file<input type="file" accept=".csv,.json,text/csv,application/json" onchange="importFile(event)"></label></div><p class="note">Format: op is READ or WRITE, data is required for WRITE, expect is optional. Widths must match the current RAM. Full details on the About page.</p><div class="actions"><button class="secondary" onclick="dl('ram_image.csv',ramCSV(),'text/csv')">Export RAM image (CSV)</button><button class="secondary" onclick="dl('test_cases.csv',testsCSV(),'text/csv')">Export test results (CSV)</button></div>`)}</div>
+  ${ds.msg?`<div class="result ${ds.msg.startsWith('Import failed')?'danger':'ok'}" role="status" style="margin-bottom:18px">${esc(ds.msg)}</div>`:''}
+  ${ds.ops.length?panel(`Operations · ${ds.ops.length}`,`<div class="actions" style="margin-bottom:12px"><button onclick="runDs(false)">Run on a fresh RAM</button><button class="secondary" onclick="runDs(true)">Run on the live RAM</button></div><p class="note">A fresh RAM has the same shape as the Memory Lab RAM but no data and no faults. Running on the live RAM changes its contents and applies its faults.</p>${b?`<div class="stats"><div class="stat"><span>Total</span><strong>${b.length}</strong></div><div class="stat"><span>Passed</span><strong>${b.filter(x=>x.status==='PASS').length}</strong></div><div class="stat"><span>Failed</span><strong>${b.filter(x=>x.status==='FAIL').length}</strong></div><div class="stat"><span>No expectation</span><strong>${b.filter(x=>x.status==='N/A').length}</strong></div><div class="stat"><span>Rejected ops</span><strong>${b.filter(x=>/^(INVALID|UNINIT)/.test(x.actual)).length}</strong></div></div>`:''}
+   <div class="tablewrap"><table><thead><tr><th>ID</th><th>Op</th><th>Address</th><th>Data</th><th>Expected</th>${b?'<th>Actual</th><th>Status</th>':''}</tr></thead><tbody>${(b||ds.ops).slice(0,300).map(o=>`<tr class="${o.status==='FAIL'?'mism':''}"><td>${esc(o.id)}</td><td>${o.op}</td><td class="mono">${esc(o.address)}</td><td class="mono">${esc(o.data||'')}</td><td class="mono">${esc(o.expect||'')}</td>${b?`<td class="mono">${esc(o.actual)}</td><td class="${o.status==='PASS'?'pass':o.status==='FAIL'?'fail':'muted'}">${o.status}</td>`:''}</tr>`).join('')}</tbody></table></div>`):panel('No dataset loaded',`<p class="muted">Generate one with a seed, or import a file. The sample file test_dataset.csv (seed 2201, 4-bit address, 8-bit data, 30 operations) ships with the project.</p>`)}`}
+function genData(){const seed=parseInt($('#ds-seed').value)||0,count=Math.max(5,Math.min(500,parseInt($('#ds-count').value)||30));S.ds.seed=seed;S.ds.count=count;S.ds.ops=genDataset(seed,S.ram.a,S.ram.d,count);S.ds.batch=null;S.ds.msg=`Generated ${count} operations with seed ${seed} (${S.ram.a}-bit address, ${S.ram.d}-bit data).`;record(`DATASET generated seed ${seed}, ${count} ops`);save();render()}
+function dsDownload(t){if(t==='csv')dl('test_dataset.csv',toCSV(S.ds.ops),'text/csv');else dl('test_dataset.json',JSON.stringify({seed:S.ds.seed,addressBits:S.ram.a,dataBits:S.ram.d,ops:S.ds.ops},null,2),'application/json')}
+function importFile(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{S.ds.ops=parseDatasetText(r.result,f.name);S.ds.batch=null;S.ds.msg=`Imported ${S.ds.ops.length} operations from ${f.name}.`;record(`DATASET imported ${f.name}`)}catch(e){S.ds.msg='Import failed: '+e.message}save();render()};r.readAsText(f)}
+function runDs(live){const ram=live?S.ram:new RAM(S.ram.a,S.ram.d,S.ram.parityOn);S.ds.batch=runBatch(ram,S.ds.ops);const p=S.ds.batch.filter(x=>x.status==='PASS').length,f=S.ds.batch.filter(x=>x.status==='FAIL').length;S.ds.msg=`Ran ${S.ds.ops.length} operations on the ${live?'live':'fresh'} RAM: ${p} passed, ${f} failed.`;record(`BATCH ${live?'live':'fresh'} RAM: ${p} pass, ${f} fail`,live);save();render()}
+function ramCSV(){return'word,address,hex,data,status\n'+S.ram.cells.map((v,i)=>[i,pad(i,S.ram.a),'0x'+i.toString(16).toUpperCase(),v||'',v?'WRITTEN':'EMPTY'].join(',')).join('\n')+'\n'}
+function testsCSV(){const l=S.tests?S.tests.list:runTestSuite(S.seed);return'id,type,name,input,expected,actual,status\n'+l.map(x=>[x.id,x.kind,x.name,x.input,x.expected,x.actual,x.status].map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n')+'\n'}
+
+/* ============================================================
+   REPORTS
+   ============================================================ */
+function reportHtml(){const t=S.tests,e=Object.values(S.experiments);const pc=S.pld.PLA,pa=S.pld.PAL;
+  return`<div id="report"><p><b>Project:</b> Memory & PLD Educational Lab Simulator</p><p><b>Course:</b> EC2201 – Digital Electronics · Unit IV – Memory and Programmable Logic Devices</p><p><b>Generated:</b> ${esc(new Date().toLocaleString())}</p><p><b>Seed:</b> ${S.seed}</p>
+  <h4>Objective</h4><p>Demonstrate RAM operations, address decoding, memory fault simulation and detection, PLA/PAL programming, and automated verification with reproducible data.</p>
+  <h4>Memory configuration</h4><p>${S.ram.size} words × ${S.ram.d} bits (${S.ram.a}-bit address), parity ${S.ram.parityOn?'on':'off'}. Operations performed: ${S.stats.ops}. Faults detected: ${S.stats.detected}. Active faults: ${S.ram.faults.length?S.ram.faults.map(faultDesc).map(esc).join('; '):'none'}.</p>
+  <h4>PLA / PAL designs</h4>${simpleTable(['Device','Inputs','Outputs','Product terms','Compile','Functions (read from fuse map)'],[['PLA',pc.n,pc.m,pc.pld.p,pc.ok?'OK':'ERROR',pldExprs(pc.pld).map((x,i)=>`F${i+1} = ${x}`).join(' ; ')],['PAL',pa.n,pa.m,`${pa.cap}/output`,pa.ok?'OK':'ERROR',pldExprs(pa.pld).map((x,i)=>`F${i+1} = ${x}`).join(' ; ')]])}
+  <h4>Experiments</h4>${e.length?simpleTable(['#','Experiment','Status','Summary'],Object.values(S.experiments).sort((a,b)=>a.id-b.id).map(r=>[r.id+1,r.name,r.status,r.summary])):'<p class="muted">No experiments run yet. Use Run full verification on the Dashboard.</p>'}
+  <h4>Test results</h4>${t?`<p>${t.list.filter(x=>x.status==='PASS').length} of ${t.list.length} passed (${t.list.filter(x=>x.kind==='Normal').length} normal, ${t.list.filter(x=>x.kind==='Edge').length} edge/fault). Run at ${esc(t.at)}.</p>${simpleTable(['ID','Type','Test','Expected','Actual','Status'],t.list.map(x=>[x.id,x.kind,x.name,x.expected,x.actual,x.status]))}`:'<p class="muted">Tests not run yet.</p>'}
+  <h4>Recent intermediate states</h4>${logHtml(15)}
+  <h4>Conclusion</h4><p>${t&&t.list.every(x=>x.status==='PASS')&&e.length===EXPERIMENTS.length&&e.every(x=>x.status==='PASS')?'All experiments and tests passed. The RAM, decoder, fault-detection logic and PLA/PAL arrays behaved as specified.':'Run all experiments and tests to complete the conclusion. Any failed rows above show where behaviour differs from the specification.'}</p></div>`}
+function reportMd(){const t=S.tests?S.tests.list:runTestSuite(S.seed);const ex=Object.values(S.experiments).sort((a,b)=>a.id-b.id);
+  return`# Memory & PLD Educational Lab Simulator - Report\n\nGenerated: ${new Date().toLocaleString()}\nSeed: ${S.seed}\n\n## Memory\n${S.ram.size} words x ${S.ram.d} bits, parity ${S.ram.parityOn?'on':'off'}, operations ${S.stats.ops}, faults detected ${S.stats.detected}.\n\n## PLA / PAL\n- PLA: ${pldExprs(S.pld.PLA.pld).map((x,i)=>`F${i+1} = ${x}`).join('; ')}\n- PAL: ${pldExprs(S.pld.PAL.pld).map((x,i)=>`F${i+1} = ${x}`).join('; ')}\n\n## Experiments\n${ex.length?ex.map(r=>`- ${r.id+1}. ${r.name}: ${r.status} - ${r.summary}`).join('\n'):'- not run'}\n\n## Tests (${t.filter(x=>x.status==='PASS').length}/${t.length} passed)\n${t.map(x=>`- ${x.id} [${x.kind}] ${x.name}: expected ${x.expected}, actual ${x.actual} - ${x.status}`).join('\n')}\n`}
+function reportsPage(){return title('Reports','A printable report built from the current session: configuration, designs, experiment results, test results and recent intermediate states.')+panel('Experiment report',reportHtml()+`<div class="actions no-print" style="margin-top:16px"><button onclick="window.print()">Print / Save as PDF</button><button class="secondary" onclick="dl('report.md',reportMd(),'text/markdown')">Download Markdown</button><button class="secondary" onclick="runEverything()">Run full verification</button></div>`)}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+function aboutPage(){return title('About','EC2201 – Digital Electronics · Unit IV – Memory and Programmable Logic Devices')+
+  `<div class="docs">${panel('Project objective',`<p>An interactive virtual laboratory with reproducible simulations for RAM, address decoding, Boolean expressions, truth tables, PLA/PAL architectures, memory faults, guided experiments, automated tests and printable reports. It runs entirely in the browser with no server or internet connection.</p><div class="chips">${['RAM','Address decoding','Parity','Boolean logic','Quine-McCluskey','PLA','PAL','Fault injection','March C-','Automated tests','Datasets','Reports'].map(x=>`<span class="chip">${x}</span>`).join('')}</div>`)}
+  ${panel('How to use it',`<ol class="step-list"><li><b>Memory Lab:</b> write 10101010 to address 0010, read it back, watch the decoder and buses.</li><li><b>Fault Simulator:</b> inject Stuck-at-0, then press Run March C- to locate it.</li><li><b>PLA Designer / PAL Designer:</b> pick the Full adder preset, press Compile, click fuses and toggle inputs A, B, C.</li><li><b>PLA vs PAL:</b> in the PAL Designer keep the Full adder preset and lower Terms per output to 2. The compile is rejected because a PAL cannot add terms, while the PLA can.</li><li><b>Experiments and Test Cases:</b> run everything and read the tables.</li><li><b>Datasets:</b> generate with a seed, run the batch, export CSV.</li><li><b>Reports:</b> print or download the report.</li></ol>`)}
+  ${panel('Assumptions and input format',`<ul><li>Address: exactly N binary bits (e.g. 0010) or 0x hex. Data: exactly D binary bits (e.g. 10101010) or 0x hex.</li><li>Bit 0 is the least significant bit. Cells start empty (uninitialised).</li><li>Stuck-at faults force a bit on both write and read. Bit flips change stored data only, so parity can catch them.</li><li>An AND row with no fuses is unused and outputs 0.</li><li>PLA and PAL: 2–4 inputs (A–D), 1–3 outputs. PLA up to 16 terms, PAL 1–8 fixed terms per output.</li><li>Dataset CSV columns: <span class="mono">id,op,address,data,expect</span>. op = READ or WRITE. expect = OK, the read value, INVALID_ADDRESS, INVALID_DATA or UNINITIALIZED.</li></ul>`)}
+  ${panel('Files for submission',`<p>Download the documentation files, and keep them next to index.html.</p><div class="actions"><button onclick="dl('README.md',README_MD,'text/markdown')">Download README.md</button><button class="secondary" onclick="dl('requirements.txt',REQ_TXT)">Download requirements.txt</button><button class="secondary" onclick="dl('test_dataset.csv',toCSV(genDataset(2201,4,8,30)),'text/csv')">Download test_dataset.csv</button></div><h4>README preview</h4><pre>${esc(README_MD)}</pre>`)}
+  ${panel('References',`<ul><li>M. Morris Mano, Michael D. Ciletti – Digital Design, Pearson.</li><li>Thomas L. Floyd – Digital Fundamentals, Pearson.</li><li>John F. Wakerly – Digital Design: Principles and Practices, Pearson.</li><li>A. J. van de Goor – Testing Semiconductor Memories (March tests).</li><li>W. V. Quine (1952), E. J. McCluskey (1956) – tabular Boolean minimisation.</li></ul>`)}
+  ${panel('Reset',`<p class="note">Clear everything saved in this browser (memory, faults, designs, results) and start again.</p><button class="secondary" onclick="if(confirm('Reset the whole lab?')){try{localStorage.removeItem('mpld2')}catch(e){}S=defaultState();render();toast('Lab reset')}">Reset lab</button>`)}</div>`}
+
+render();
+</script>
+</body>
+</html>
